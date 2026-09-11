@@ -1,0 +1,4 @@
+node_modules/
+bin/
+*.tsbuildinfo
+Pulumi.*.yaml
