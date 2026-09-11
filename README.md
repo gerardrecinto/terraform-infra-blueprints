@@ -115,6 +115,8 @@ module "log_archive" {
 }
 ```
 
+Same module, same behavior, ported to Pulumi (TypeScript): [`Pulumi/aws-s3-lifecycle`](Pulumi/aws-s3-lifecycle/). Written for a direct side-by-side comparison of the two IaC models on one real module rather than a comparison writeup with no code behind it.
+
 ### `modules/eks`
 
 Multi-account EKS with VPC CNI custom networking, OIDC federation, mixed Linux/Windows node groups:
