@@ -21,7 +21,7 @@ jobs:
             AWS/modules/ Azure/ GCP/ AliCloud/ OpenStack/ on-prem/ secure-connectivity/ live/ \
             --exclude '*.tfstate' --exclude '*.tfstate.backup' --exclude '.terraform/*' --exclude '.terragrunt-cache/*'
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: terraform-infra-blueprints-${{ github.ref_name }}.zip
           generate_release_notes: true
