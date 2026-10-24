@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>terraform-infra-blueprints: IaC module catalog</title>
+<meta name="description" content="Browse every Terraform module and workflow across AWS, Azure, GCP, AliCloud, OpenStack and on-prem, generated from the source on each deploy, with input and validation counts.">
+<meta property="og:title" content="terraform-infra-blueprints">
+<meta property="og:description" content="Browse every Terraform module and workflow across AWS, Azure, GCP, AliCloud, OpenStack and on-prem, generated from the source on each deploy, with input and validation counts.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314b8a6'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+
+:root{--bg:#f8fafc;--panel:#fff;--panel2:#f1f5f9;--line:#e2e8f0;--fg:#0f172a;--mute:#475569;--brand:#0f766e;--brand-bg:#ccfbf1;--ok:#047857;--ok-bg:#d1fae5;--err:#b91c1c;--err-bg:#fee2e2;--code:#0b1220;--code-fg:#e2e8f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#2dd4bf;--brand-bg:#062f2b;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}}
+:root[data-theme=dark]{--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#2dd4bf;--brand-bg:#062f2b;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+code,pre,textarea,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--fg);text-decoration:none}
+.logo i{width:22px;height:22px;border-radius:6px;background:#14b8a6;display:inline-block}
+nav .links{display:flex;gap:18px;align-items:center;font-size:14px}
+nav .links a{color:var(--mute);text-decoration:none}
+nav .links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
+.btn.primary{background:#14b8a6;border-color:#14b8a6;color:#04211e}
+.btn.primary:hover{background:#2dd4bf}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #14b8a6;outline-offset:2px}
+.hero{padding:72px 0 40px;text-align:center}
+.pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--brand)}
+.lede{max-width:700px;margin:0 auto 28px;color:var(--mute);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin-top:36px;color:var(--mute);font-size:14px}
+.stats b{display:block;color:var(--fg);font-size:22px}
+section{padding:56px 0}
+h2{font-size:clamp(26px,4vw,36px);margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 28px;max-width:720px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lab{grid-template-columns:minmax(0,1fr)}nav .links .hide-s{display:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.card h3{margin:0;padding:12px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 12px system-ui;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer;text-transform:none;letter-spacing:0}
+.chip[aria-pressed=true]{background:var(--brand-bg);border-color:var(--brand);color:var(--brand)}
+#log{display:block;width:100%;height:420px;border:0;padding:12px 14px;font-size:12.5px;line-height:1.55;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto}
+.src{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--mute);flex-wrap:wrap}
+.out{min-height:420px}
+.status{padding:16px;color:var(--mute);font-size:14px}
+.verdict{padding:18px 16px;border-bottom:1px solid var(--line);background:var(--err-bg)}
+.verdict.unknown{background:var(--panel2)}
+.verdict b{display:block;font-size:20px;text-transform:uppercase;letter-spacing:.04em;color:var(--err)}
+.verdict.unknown b{color:var(--mute)}
+.verdict span{font-size:14px;color:var(--mute)}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;max-width:260px;display:inline-block;vertical-align:middle;margin-right:10px;width:60%}
+.bar i{display:block;height:100%;background:#14b8a6}
+.site{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.site:last-child{border:0}
+.site code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.fix{background:var(--ok-bg);color:var(--ok);padding:10px 12px;border-radius:8px;font-size:14px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:860px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.step .n{width:28px;height:28px;border-radius:8px;background:var(--brand-bg);color:var(--brand);display:grid;place-items:center;font-weight:700;margin-bottom:10px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:0;color:var(--mute);font-size:15px}
+.tw{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;max-width:100%}
+table{width:100%;min-width:560px;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:ui-monospace,monospace;font-weight:700;white-space:nowrap}
+.install pre{background:var(--code);color:var(--code-fg);padding:16px;border-radius:12px;overflow-x:auto;font-size:13.5px;margin:0 0 12px}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.limits{background:var(--panel);border:1px solid var(--line);border-left:4px solid #f59e0b;border-radius:10px;padding:16px 20px}
+.limits ul{margin:8px 0 0;padding-left:20px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--mute);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.tools2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.tools2 input[type=search]{flex:1;min-width:200px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.m{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.m b{font-family:ui-monospace,monospace;font-size:13.5px;overflow-wrap:anywhere}
+.m .meta{color:var(--mute);font-size:12.5px;margin:4px 0 8px}
+.m .rs code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:11.5px;margin:0 4px 4px 0;display:inline-block;overflow-wrap:anywhere}
+.m button.more{all:unset;cursor:pointer;color:var(--brand);font-size:13px;text-decoration:underline;margin-top:6px;display:inline-block}
+.m table{min-width:0;font-size:12.5px;margin-top:8px;display:block;overflow-x:auto}
+.m td,.m th{padding:6px 8px}
+.cl{font:700 11px ui-monospace,monospace;padding:2px 8px;border-radius:6px;background:var(--brand-bg);color:var(--brand);margin-left:6px;vertical-align:middle}
+.cl.wf{background:var(--panel2);color:var(--mute)}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--brand)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-size:26px}
+.kpi span{color:var(--mute);font-size:13px}
+.cnt{color:var(--mute);font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+pre.live{background:var(--code);color:var(--code-fg);padding:14px 16px;border-radius:12px;overflow-x:auto;font-size:12.5px;margin:0}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="#top"><i></i>terraform-infra-blueprints</a>
+  <div class="links"><a href="#try" class="hide-s">Catalog</a><a href="#install" class="hide-s">Install</a><a class="btn" href="https://github.com/gerardrecinto/terraform-infra-blueprints">GitHub</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <h1>Infrastructure code that rejects bad input at <em>plan time</em>.</h1>
+  <p class="lede">Reusable Terraform modules and workflows for Kubernetes, storage tiering, private connectivity and observability across six platforms, with a Terragrunt layer for running one workflow in many environments. Browse all of it here.</p>
+  <div class="cta"><a class="btn primary" href="#try">Browse the catalog</a><a class="btn" href="#install">Use a module</a></div>
+  <div class="stats"><div><b>6</b>platforms</div><div><b id="n-in">510</b>inputs, counted from source</div><div><b>0</b>accounts touched here</div></div>
+</div></header>
+
+
+<section id="try"><div class="wrap">
+  <h2>Browse every module, read straight from the code</h2>
+  <p class="sub">The catalog below is generated from the <code>.tf</code> files on every deploy, so the counts cannot drift from the repo. Search, filter by cloud, and open a module to see its inputs. The numbers at the top are computed, not typed.</p>
+  <div class="kpis" id="kpis"><div class="status" id="boot">Loading the catalog...</div></div>
+  <div class="tools2"><label class="sr" for="q">Search</label><input id="q" type="search" placeholder="Search modules, variables or resource types, e.g. lifecycle, eks, privatelink">
+    <span class="chips" id="clouds" role="group" aria-label="Filter by cloud"></span>
+    <span class="chips" role="group" aria-label="Filter by kind"><button class="chip" data-k="all" aria-pressed="true">All</button><button class="chip" data-k="module" aria-pressed="false">Modules</button><button class="chip" data-k="workflow" aria-pressed="false">Workflows</button></span></div>
+  <p class="cnt" id="count"></p>
+  <div class="grid" id="grid"></div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Design principles</h2>
+  <p class="sub">The README's five rules, in short.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Everything in Terraform</h3><p>Helm release versions, ConfigMaps, IAM, alert rules and cleanup tasks are resources. If it cannot be reviewed in a PR and reverted, it does not exist in production.</p></div>
+    <div class="step"><div class="n">2</div><h3>Converge ephemeral state</h3><p>Pod IPs change. Modules query live cluster state and reconcile load balancer targets to match, so each apply is a reconciliation loop.</p></div>
+    <div class="step"><div class="n">3</div><h3>Fail at plan time</h3><p>Every input has a description. Inputs with a real constraint have a validation block, so a bad environment name is rejected by <code>plan</code>, not by a provider an hour in.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>One workflow, many environments</h2>
+  <p class="sub">A Terragrunt layer runs the same workflow for dev and prod without copying it. These are the live units found in the repo.</p>
+  <pre class="live" id="live"></pre>
+</div></section>
+
+<section id="install" class="install"><div class="wrap">
+  <h2>Use a module</h2>
+  <p class="sub">Terraform 1.7 or later. Replace every placeholder with your own values.</p>
+  <div class="cols2">
+    <div>
+<pre>module "log_archive" {
+  source = "./AWS/modules/s3_lifecycle"
+
+  bucket_name = "app-logs-prod"
+  environment = "prod"
+  log_prefix  = "logs/"
+}</pre>
+    </div>
+    <div>
+<pre>terraform fmt -check -recursive
+terraform init -backend=false
+terraform validate
+trivy config .</pre>
+      <p class="note">CI runs fmt, validate and a Trivy IaC scan across the modules.</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="limits">
+    <strong>What this does not do</strong>
+    <ul>
+      <li>This is a personal portfolio repository. The README says every name, account ID and metric was replaced with generic placeholders.</li>
+      <li>The catalog reads variables and resource types with a pattern scan. It is not a Terraform parser, so a variable declared in an unusual way could be missed.</li>
+      <li>Validating a module is not the same as applying it. Nothing here claims a live deployment.</li>
+    </ul>
+  </div>
+</div></section>
+
+
+<footer><div class="wrap">
+  <span>terraform-infra-blueprints. MIT licensed. Built by <a href="https://github.com/gerardrecinto">Gerard Recinto</a>.</span>
+  <span><a href="https://github.com/gerardrecinto/terraform-infra-blueprints">Source</a> &middot; <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/releases">Releases</a></span>
+</div></footer>
+
+<script>
+
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const track = (n) => { try { if (window.plausible) window.plausible(n); } catch (e) {} };
+  let mods = [], cloud = "all", kind = "all", open = new Set();
+  function draw() {
+    const q = $("q").value.trim().toLowerCase();
+    const list = mods.filter((m) => (cloud === "all" || m.cloud === cloud) && (kind === "all" || m.kind === kind) &&
+      (!q || (m.path + " " + m.resources.join(" ") + " " + m.variables.map((v) => v.name).join(" ")).toLowerCase().includes(q)));
+    $("count").textContent = list.length + " of " + mods.length + " modules and workflows";
+    $("grid").innerHTML = list.map((m) => {
+      const v = m.variables, val = v.filter((x) => x.validated).length;
+      return `<div class="m"><b>${esc(m.name)}</b><span class="cl ${m.kind === "workflow" ? "wf" : ""}">${m.kind}</span>
+        <div class="meta">${esc(m.cloud)} &middot; ${v.length} inputs, ${val} validated, ${m.outputs.length} outputs</div>
+        <div class="rs">${m.resources.slice(0, 8).map((r) => `<code>${esc(r)}</code>`).join("")}${m.resources.length > 8 ? `<code>+${m.resources.length - 8} more</code>` : ""}</div>
+        <button class="more" data-p="${esc(m.path)}" aria-expanded="${open.has(m.path)}">${open.has(m.path) ? "Hide inputs" : "Show inputs"}</button>
+        ${open.has(m.path) ? `<table><thead><tr><th>Input</th><th>Type</th><th></th></tr></thead><tbody>${v.map((x) => `<tr><td><code>${esc(x.name)}</code></td><td>${esc(x.type)}</td><td>${x.required ? "required" : ""}${x.validated ? " validated" : ""}</td></tr><tr><td colspan="3" style="color:var(--mute)">${esc(x.desc) || "no description found"}</td></tr>`).join("")}</tbody></table>` : ""}</div>`;
+    }).join("") || '<div class="status">Nothing matches that search.</div>';
+  }
+  $("grid").addEventListener("click", (e) => { const b = e.target.closest(".more"); if (!b) return; const p = b.dataset.p; open.has(p) ? open.delete(p) : open.add(p); draw(); track("tf_open"); });
+  $("q").addEventListener("input", draw);
+  document.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => { kind = b.dataset.k; document.querySelectorAll("[data-k]").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); }));
+  fetch("catalog.json").then((r) => r.json()).then((d) => {
+    mods = d.modules;
+    const vars = mods.reduce((a, m) => a + m.variables.length, 0), val = mods.reduce((a, m) => a + m.variables.filter((x) => x.validated).length, 0), desc = mods.reduce((a, m) => a + m.variables.filter((x) => x.desc).length, 0);
+    const types = new Set(mods.flatMap((m) => m.resources)).size, clouds = [...new Set(mods.map((m) => m.cloud))];
+    $("kpis").innerHTML = [[mods.length, "modules and workflows"], [vars, "input variables"], [Math.floor((100 * desc) / vars) + "%", "have a description"], [Math.floor((100 * val) / vars) + "%", "have a validation block"], [types, "resource types used"]].map(([n, l]) => `<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("");
+    $("clouds").innerHTML = ['<button class="chip" data-c="all" aria-pressed="true">All clouds</button>'].concat(clouds.map((c) => `<button class="chip" data-c="${esc(c)}" aria-pressed="false">${esc(c)}</button>`)).join("");
+    $("clouds").addEventListener("click", (e) => { const b = e.target.closest("[data-c]"); if (!b) return; cloud = b.dataset.c; document.querySelectorAll("#clouds .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); track("tf_cloud"); });
+    $("n-in").textContent = vars; $("live").textContent = d.live.map((p) => "live/" + p).join("\n");
+    draw(); window.__TF_READY__ = true;
+  }).catch(() => { $("kpis").innerHTML = '<div class="status">The catalog did not load. The README has the full module list.</div>'; });
+})();
+
+</script>
+</body>
+</html>
