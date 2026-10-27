@@ -46,7 +46,9 @@ AWS/
 │   ├── grafana_alerting/  Grafana rules for ALBs (5XX, P99), MSK, SQS, PrivateLink
 │   ├── nginx_ingress/     NGINX on NLB, TCP ConfigMap, dynamic pod IP NLB target registration
 │   ├── sqs_sns/           SQS + SNS with DLQ, FIFO, cross-service subscriptions
-│   └── opensearch/        OpenSearch with Cognito/SAML SSO + Azure AD OIDC
+│   ├── opensearch/        OpenSearch with Cognito/SAML SSO + Azure AD OIDC
+│   ├── waf_ddos/          WAFv2 web ACL: IP block lists, per-IP rate limit, managed rules, redacted logs, optional Shield Advanced
+│   └── dr_failover/       Route 53 weighted records with health checks for draining and switching traffic between sites
 └── workflows/
     ├── deploy_eks/        EKS cluster provisioning (EKS Auto Mode, Helm/K8s providers)
     ├── blue_green_eks/    zero-downtime EB → EKS via ALB weighted target groups
@@ -82,6 +84,12 @@ OpenStack/
 │   └── octavia_ingress/   HTTPS listener, round-robin pool, active health checks, member registration
 └── workflows/
     └── deploy_magnum_k8s/ Magnum cluster + Swift backups + Octavia ingress, composed together
+
+helm/
+└── charts/web-service/    production-oriented Helm chart for EKS: rolling updates, probes, HPA, PDB, zone spread, NetworkPolicy, IRSA
+
+ansible/
+└── playbooks/k8s-rolling-node-upgrade.yml   cordon, drain, upgrade, verify and uncordon kubeadm workers one at a time
 
 live/
 ├── root.hcl                                shared locals: cloud/environment derived from the folder path
@@ -181,6 +189,46 @@ module "grafana_alerts" {
   slack_webhook_url  = var.slack_webhook
 }
 ```
+
+### `modules/waf_ddos`
+
+WAFv2 web ACL for a public web tier: explicit IPv4 and IPv6 block lists, a per-IP rate rule (block or count), AWS managed rule groups (common exploits, known bad inputs, SQL injection, IP reputation), full logging to CloudWatch with credential headers redacted, and optional Shield Advanced protections. New limits can be rolled out in `count` mode first.
+
+```hcl
+module "waf" {
+  source = "./AWS/modules/waf_ddos"
+
+  name                    = "storefront"
+  environment             = "prod"
+  associate_resource_arns = [aws_lb.public.arn]
+  rate_limit_per_5min     = 2000
+  rate_limit_action       = "count" # observe first, then switch to "block"
+  blocked_ipv4_cidrs      = ["203.0.113.0/24"]
+}
+```
+
+Reference implementation: it carries no production metrics, and every limit should be tuned against real traffic. Threat model: [docs/threat-model-web-service.md](docs/threat-model-web-service.md).
+
+### `modules/dr_failover`
+
+Weighted Route 53 records with a health check per site. Normal traffic follows the weights; a planned drain sets a site's weight to 0; a failing site is removed automatically by its health check. Validation rejects a single-site setup and an all-zero weight set (which Route 53 treats as equal weights).
+
+```hcl
+module "traffic" {
+  source = "./AWS/modules/dr_failover"
+
+  zone_id     = var.zone_id
+  record_name = "app.example.com"
+  ttl         = 30
+
+  endpoints = {
+    dc-east  = { target = "east.example.internal", weight = 0 }   # drained
+    aws-west = { target = "west.example.internal", weight = 100 }
+  }
+}
+```
+
+Procedure and abort criteria: [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md).
 
 ---
 
@@ -304,6 +352,26 @@ status and [secure-connectivity/docs/interview-guide.md](secure-connectivity/doc
 (once written) for the design-decision writeups.
 
 ---
+
+## Helm chart
+
+[`helm/charts/web-service`](helm/charts/web-service/) deploys a stateless HTTP service on Kubernetes and EKS with the settings that usually get missed: `maxUnavailable: 0` rolling updates with `progressDeadlineSeconds`, startup, liveness and readiness probes, graceful shutdown with a `preStop` sleep, an HPA with a slow scale-down, a PodDisruptionBudget, zone and node spread, a default-deny style NetworkPolicy, a restricted pod security context, IRSA through `serviceAccount.roleArn`, image pinning by digest, and a values schema. 18 pytest checks render the chart and assert these properties (`python -m pytest helm/tests`).
+
+```bash
+helm upgrade --install web helm/charts/web-service -n web --create-namespace \
+  --set image.repository=ghcr.io/example/web --set image.digest=sha256:<digest> \
+  --set serviceAccount.roleArn=arn:aws:iam::<account>:role/web
+```
+
+## Ansible
+
+[`ansible/playbooks/k8s-rolling-node-upgrade.yml`](ansible/) upgrades kubeadm workers one at a time with a health gate between nodes and leaves a failed node cordoned. Checked with `ansible-lint` (production profile) in CI; not run against a real cluster from this repository.
+
+## Compliance and operations notes
+
+- [docs/compliance-controls-map.md](docs/compliance-controls-map.md): where SOC 2, PCI DSS and SOX control areas line up with these modules (supports evidence gathering; not a compliance claim).
+- [docs/threat-model-web-service.md](docs/threat-model-web-service.md): STRIDE walk-through for the reference stack.
+- [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md): planned site drain and rehearsal.
 
 ## License
 
