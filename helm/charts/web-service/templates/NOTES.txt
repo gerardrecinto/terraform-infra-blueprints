@@ -1,0 +1,5 @@
+{{ include "web-service.fullname" . }} is deployed.
+
+Check the rollout:   kubectl rollout status deployment/{{ include "web-service.fullname" . }} -n {{ .Release.Namespace }}
+Roll back:           helm rollback {{ .Release.Name }} -n {{ .Release.Namespace }}
+Run the smoke test:  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
