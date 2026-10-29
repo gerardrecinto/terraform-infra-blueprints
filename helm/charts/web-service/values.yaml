@@ -1,0 +1,141 @@
+# Default values for web-service. Everything here is a safe starting point, not a
+# recommendation for any specific workload: size resources and autoscaling from load tests.
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 3
+
+image:
+  repository: ghcr.io/example/web-service
+  # Pin by digest in production (set image.digest); the tag is used only when no digest is given.
+  tag: ""
+  digest: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+containerPort: 8080
+
+# Environment and secrets. Reference existing Secrets and ConfigMaps; never put values here.
+env: []
+envFrom: []
+
+serviceAccount:
+  create: true
+  name: ""
+  # IRSA: set to the IAM role ARN to give pods AWS permissions without static keys.
+  roleArn: ""
+  annotations: {}
+  automountServiceAccountToken: false
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+probes:
+  startup:
+    path: /healthz
+    failureThreshold: 30
+    periodSeconds: 2
+  liveness:
+    path: /healthz
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /readyz
+    periodSeconds: 5
+    failureThreshold: 3
+
+# Zero-downtime rollout: never remove a ready pod before its replacement is ready.
+strategy:
+  maxUnavailable: 0
+  maxSurge: 25%
+progressDeadlineSeconds: 90
+
+# Graceful shutdown: stop receiving traffic, then finish in-flight requests. The preStop sleep
+# gives load balancers time to deregister the pod before the process gets SIGTERM.
+terminationGracePeriodSeconds: 45
+preStopSleepSeconds: 10
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: null
+
+podDisruptionBudget:
+  enabled: true
+  # Exactly one of minAvailable or maxUnavailable is rendered; minAvailable wins when both are set.
+  minAvailable: ""
+  maxUnavailable: 1
+
+# Spread pods across zones and nodes so a zone loss does not take the service down.
+topologySpread:
+  enabled: true
+  maxSkew: 1
+  zoneWhenUnsatisfiable: ScheduleAnyway
+  nodeWhenUnsatisfiable: ScheduleAnyway
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+networkPolicy:
+  enabled: true
+  # Namespaces allowed to reach the service (matched by the kubernetes.io/metadata.name label).
+  ingressNamespaces: []
+  # Additional CIDRs allowed to reach the service, for example a load balancer subnet.
+  ingressCIDRs: []
+  # Allow DNS and HTTPS egress by default; add more with egressExtra.
+  allowDNS: true
+  egressExtra: []
+
+ingress:
+  enabled: false
+  className: alb
+  annotations: {}
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Requires the Prometheus Operator CRDs.
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  path: /metrics
+  labels: {}
+
+# Writable scratch space for read-only root filesystems.
+tmpVolume:
+  enabled: true
+  sizeLimit: 64Mi
