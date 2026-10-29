@@ -1,0 +1,16 @@
+apiVersion: v2
+name: web-service
+description: A production-oriented Helm chart for a stateless HTTP service on Kubernetes and AWS EKS (rolling updates, probes, autoscaling, disruption budget, zone spread, network policy, IRSA)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.30.0-0"
+keywords:
+  - eks
+  - kubernetes
+  - web
+  - hpa
+  - pdb
+maintainers:
+  - name: Gerard Recinto
+    url: https://github.com/gerardrecinto
