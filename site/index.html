@@ -42,7 +42,7 @@ nav .links a:hover{color:var(--fg)}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
 .btn.primary{background:#14b8a6;border-color:#14b8a6;color:#04211e}
 .btn.primary:hover{background:#2dd4bf}
-.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #14b8a6;outline-offset:2px}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,pre:focus-visible{outline:2px solid #14b8a6;outline-offset:2px}
 .hero{padding:72px 0 40px;text-align:center}
 .pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
 h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
@@ -173,7 +173,7 @@ html{scroll-behavior:smooth}
   <p class="plain">Download the project and have Terraform check one building block, without touching any cloud account.</p>
   <p class="sub">Needs git and Terraform 1.7 or later. This clones the repo and validates one module. It does not need cloud credentials and creates nothing.</p>
   <div class="qs">
-<pre id="qs-code">git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
+<pre tabindex="0" id="qs-code">git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
 cd terraform-infra-blueprints/AWS/modules/s3_lifecycle
 terraform init -backend=false
 terraform validate</pre>
@@ -181,7 +181,7 @@ terraform validate</pre>
   <div class="cols2">
     <div>
       <p class="note">To use a module from your own configuration, point <code>source</code> at a pinned release tag and replace the values with your own:</p>
-<pre>module "log_archive" {
+<pre tabindex="0">module "log_archive" {
   source = "github.com/gerardrecinto/terraform-infra-blueprints//AWS/modules/s3_lifecycle?ref=v1.3.0"
 
   bucket_name = "your-unique-bucket-name"
@@ -191,7 +191,7 @@ terraform validate</pre>
     </div>
     <div>
       <p class="note">Repo-wide checks, run from the repo root:</p>
-<pre>terraform fmt -check -recursive
+<pre tabindex="0">terraform fmt -check -recursive
 trivy config .</pre>
       <p class="note">CI runs fmt, validate and a Trivy IaC scan across the modules, helm lint and render tests on the chart, and ansible-lint on the playbook.</p>
     </div>
@@ -202,9 +202,9 @@ trivy config .</pre>
   <h2>Three things worth looking at</h2>
   <p class="sub">Small examples of how the modules are built. Each one links to its code.</p>
   <div class="steps">
-    <div class="step"><h3>Encryption by default</h3><p class="plain">Files saved in the storage bucket are scrambled so only the right people can read them.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/s3_lifecycle"><code>s3_lifecycle</code></a> bucket is always encrypted (AES256, or your KMS key if you give one), blocks all public access and refuses plain HTTP.</p></div>
+    <div class="step"><h3>Encryption by default</h3><p class="plain">Files saved in the storage bucket are scrambled so only the right people can read them.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/s3_lifecycle"><code>s3_lifecycle</code></a> bucket is encrypted (AES256, or your KMS key), blocks public access, and refuses plain HTTP when its default encryption policy is enabled.</p></div>
     <div class="step"><h3>Traffic failover</h3><p class="plain">If one site goes down, visitors are sent to another one automatically.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/dr_failover"><code>dr_failover</code></a> module sets weighted Route 53 records with a health check per site. It rejects a single-site setup.</p></div>
-    <div class="step"><h3>Cost tagging</h3><p class="plain">Every cloud resource gets a label saying which team owns it, so the bill can be split fairly.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/cost_tagging"><code>cost_tagging</code></a> module adds a required-tags policy, cost allocation tags and per-team budgets.</p></div>
+    <div class="step"><h3>Cost tagging</h3><p class="plain">Set consistent cost tags and team budgets for supported AWS resources.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/cost_tagging"><code>cost_tagging</code></a> module configures tag compliance, cost allocation tags and per-team budgets. It does not add missing tags or reject every untagged resource.</p></div>
   </div>
 </div></section>
 

@@ -38,6 +38,17 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
+  lifecycle {
+    precondition {
+      condition     = var.transition_to_glacier_days >= var.transition_to_ia_days + 30
+      error_message = "transition_to_glacier_days is the object age and must be at least 30 days after transition_to_ia_days for the Standard-IA minimum storage duration."
+    }
+    precondition {
+      condition     = var.expiration_days == 0 || var.expiration_days > var.transition_to_glacier_days
+      error_message = "expiration_days must be 0 (disabled) or greater than transition_to_glacier_days so expiration does not override tiering."
+    }
+  }
+
   rule {
     id     = "log-tiering"
     status = "Enabled"
