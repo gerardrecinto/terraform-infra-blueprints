@@ -36,7 +36,7 @@ Does not:
 
 **Everything version-controlled, nothing click-ops.** IAM roles, Cognito federation, Grafana alert rules, ACR cleanup tasks: all Terraform resources. If it can't be reviewed in a PR and rolled back with a revert, it doesn't exist in production.
 
-**Bad input fails at plan time, not three resources deep in a provider error.** Every one of the 534 input variables across every module and workflow in this repo has a `description`, and the ones with a real constraint (environments, CIDR blocks, retention windows, percentage thresholds, SQS/Log Analytics service limits) have a `validation` block enforcing it. `terraform plan` should tell you `environment must be one of: dev, staging, prod`, not fail an hour later on a resource that silently accepted garbage.
+**Bad input fails at plan time, not three resources deep in a provider error.** Every input variable across the modules and workflows in this repo has a `description`, and the ones with a real constraint (environments, CIDR blocks, retention windows, percentage thresholds, SQS/Log Analytics service limits) have a `validation` block enforcing it. `terraform plan` should tell you `environment must be one of: dev, staging, prod`, not fail an hour later on a resource that silently accepted garbage.
 
 </details>
 
@@ -126,7 +126,7 @@ module "log_archive" {
   transition_to_glacier_days = 90
   kms_key_arn                = var.kms_key_arn
   enforce_encryption_policy  = true
-  replication_regions        = ["ap-south-1", "eu-central-1"]
+  replication_regions        = [] # destinations and KMS replication require separate setup
 }
 ```
 
@@ -138,6 +138,8 @@ Run the plan regression tests without AWS credentials or resources (Terraform 1.
 terraform -chdir=AWS/modules/s3_lifecycle init -backend=false
 terraform -chdir=AWS/modules/s3_lifecycle test
 ```
+
+Replication destinations are not created by this module. Read the [replication prerequisites and current limits](AWS/modules/s3_lifecycle/README.md) before enabling it.
 
 Same module, same behavior, ported to Pulumi (TypeScript): [`Pulumi/aws-s3-lifecycle`](Pulumi/aws-s3-lifecycle/). Written for a direct side-by-side comparison of the two IaC models on one real module rather than a comparison writeup with no code behind it.
 
@@ -253,7 +255,7 @@ Procedure and abort criteria: [docs/pull-the-plug-runbook.md](docs/pull-the-plug
 
 ### `modules/aks`
 
-AKS with Azure AD RBAC, workload identity (OIDC issuer), ACR pull role, Container Insights, auto-scaling node pools.
+AKS with a private control-plane endpoint, Microsoft Entra RBAC, local administrator credentials disabled, workload identity (OIDC issuer), ACR pull role, Container Insights and auto-scaling node pools. Clients need private network and DNS access. The enterprise workflow requires an Entra tenant ID and uses Calico with Azure CNI Overlay. See the [security review and remaining findings](docs/SECURITY_REVIEW.md).
 
 ### `workflows/deploy_aks_logging`
 

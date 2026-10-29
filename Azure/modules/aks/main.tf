@@ -21,6 +21,12 @@ resource "azurerm_kubernetes_cluster" "this" {
   dns_prefix          = "${var.cluster_name}-${var.environment}"
   kubernetes_version  = var.kubernetes_version
 
+  # No internet-facing control-plane endpoint or local admin credentials.
+  private_cluster_enabled             = true
+  private_cluster_public_fqdn_enabled = false
+  role_based_access_control_enabled   = true
+  local_account_disabled              = true
+
   # System node pool -- separate from workload pools for stability
   default_node_pool {
     name                         = "system"

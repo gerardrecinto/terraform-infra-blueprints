@@ -242,6 +242,7 @@ resource "aws_lb" "this" {
   subnets            = var.public_subnet_ids
 
   enable_deletion_protection = var.enable_deletion_protection
+  drop_invalid_header_fields = true
 
   dynamic "access_logs" {
     for_each = var.enable_access_logs ? [1] : []

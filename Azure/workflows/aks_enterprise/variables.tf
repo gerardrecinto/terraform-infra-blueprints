@@ -42,7 +42,8 @@ variable "aks_nodes_subnet_name" {
 }
 
 variable "aks_pods_subnet_name" {
-  description = "Subnet within aks_vnet_name that pods attach to (Azure CNI pod subnet)"
+  default     = ""
+  description = "Deprecated compatibility input; ignored because this workflow uses Azure CNI Overlay and pod_cidr rather than an Azure CNI pod subnet"
   type        = string
 }
 
@@ -139,4 +140,19 @@ variable "tags" {
     managed-by  = "terraform"
     environment = "PLACEHOLDER_ENV"
   }
+}
+
+variable "azure_ad_tenant_id" {
+  description = "Microsoft Entra tenant ID used for managed AKS authentication"
+  type        = string
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.azure_ad_tenant_id))
+    error_message = "azure_ad_tenant_id must be a tenant UUID."
+  }
+}
+
+variable "azure_ad_admin_group_ids" {
+  description = "Microsoft Entra group object IDs granted cluster administration; Azure role assignments are managed separately"
+  type        = list(string)
+  default     = []
 }

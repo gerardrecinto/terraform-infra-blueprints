@@ -29,11 +29,6 @@ data "azurerm_subnet" "nodes" {
   resource_group_name  = var.networking_resource_group
 }
 
-data "azurerm_subnet" "pods" {
-  name                 = var.aks_pods_subnet_name
-  virtual_network_name = var.aks_vnet_name
-  resource_group_name  = var.networking_resource_group
-}
 
 resource "azurerm_resource_group" "aks" {
   name     = "${var.prefix}-aks-rg"
@@ -64,6 +59,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   private_cluster_enabled             = true
   private_dns_zone_id                 = "System"
   private_cluster_public_fqdn_enabled = false
+  role_based_access_control_enabled   = true
+
+  azure_active_directory_role_based_access_control {
+    managed                = true
+    azure_rbac_enabled     = true
+    tenant_id              = var.azure_ad_tenant_id
+    admin_group_object_ids = var.azure_ad_admin_group_ids
+  }
 
   identity {
     type         = "UserAssigned"
@@ -75,6 +78,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
+    network_policy      = "calico"
     pod_cidr            = var.pod_cidr
     service_cidr        = var.service_cidr
     dns_service_ip      = var.dns_service_ip
@@ -86,7 +90,6 @@ resource "azurerm_kubernetes_cluster" "main" {
     vm_size                      = var.system_pool_vm_size
     node_count                   = var.system_pool_node_count
     vnet_subnet_id               = data.azurerm_subnet.nodes.id
-    pod_subnet_id                = data.azurerm_subnet.pods.id
     zones                        = var.availability_zones
     os_disk_type                 = "Ephemeral"
     only_critical_addons_enabled = true
@@ -126,7 +129,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "workload" {
   node_count            = var.workload_pool_node_count
   zones                 = var.availability_zones
   vnet_subnet_id        = data.azurerm_subnet.nodes.id
-  pod_subnet_id         = data.azurerm_subnet.pods.id
   os_disk_type          = "Ephemeral"
   mode                  = "User"
   node_labels           = { "nodepool-type" = "workload" }
@@ -148,7 +150,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   eviction_policy       = "Delete"
   spot_max_price        = -1
   vnet_subnet_id        = data.azurerm_subnet.nodes.id
-  pod_subnet_id         = data.azurerm_subnet.pods.id
   os_disk_type          = "Ephemeral"
   mode                  = "User"
 
