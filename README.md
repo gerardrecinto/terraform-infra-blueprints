@@ -418,3 +418,5 @@ Commercial angle and consulting hooks: [docs/go-to-market.md](docs/go-to-market.
 ## License
 
 MIT
+
+Optional paid help: [scoped reviews and setup](SUPPORT.md).
