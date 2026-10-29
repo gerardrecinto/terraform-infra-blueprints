@@ -2,7 +2,7 @@
   "name": "aws-s3-lifecycle",
   "main": "index.ts",
   "devDependencies": {
-    "@types/node": "^20"
+    "@types/node": "^26"
   },
   "dependencies": {
     "@pulumi/aws": "^7.50.0",
