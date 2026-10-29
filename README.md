@@ -1,6 +1,6 @@
 # terraform-infra-blueprints
 
-**In plain words:** a library of ready-made building blocks for setting up cloud servers, storage and networks, written as code so a team can review and reuse them.
+**Put simply:** a library of ready-made building blocks for setting up cloud servers, storage and networks, written as code so a team can review and reuse them.
 
 It is for platform and DevOps engineers who want reviewed Terraform modules to read, validate and adapt on AWS, Azure, GCP, AliCloud, OpenStack and on-prem. Browse the catalog: https://gerardrecinto.github.io/terraform-infra-blueprints/
 

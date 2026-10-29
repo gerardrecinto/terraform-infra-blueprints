@@ -157,7 +157,7 @@ html{scroll-behavior:smooth}
 
 <section id="try"><div class="wrap">
   <h2>Browse every module</h2>
-  <p class="plain"><b>In plain words:</b> this is a searchable list of every building block in the project, and what each one can be set up with.</p>
+  <p class="plain"><b>Put simply:</b> this is a searchable list of every building block in the project, and what each one can be set up with.</p>
   <p class="sub">Generated from the <code>.tf</code> files on every deploy, so the counts match the code. Search, filter by cloud, and open a module to see its inputs.</p>
   <div class="kpis" id="kpis"><div class="status" id="boot">Loading the catalog...</div></div>
   <noscript><p class="status">The catalog needs JavaScript. The full module list is in the <a href="https://github.com/gerardrecinto/terraform-infra-blueprints#structure">README</a>.</p></noscript>
@@ -170,7 +170,7 @@ html{scroll-behavior:smooth}
 
 <section id="install" class="install"><div class="wrap">
   <h2>Quick start</h2>
-  <p class="plain"><b>In plain words:</b> download the project and have Terraform check one building block, without touching any cloud account.</p>
+  <p class="plain"><b>Put simply:</b> download the project and have Terraform check one building block, without touching any cloud account.</p>
   <p class="sub">Needs git and Terraform 1.7 or later. This clones the repo and validates one module. It does not need cloud credentials and creates nothing.</p>
   <div class="qs">
 <pre id="qs-code">git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
@@ -202,9 +202,9 @@ trivy config .</pre>
   <h2>Three things worth looking at</h2>
   <p class="sub">Small examples of how the modules are built. Each one links to its code.</p>
   <div class="steps">
-    <div class="step"><h3>Encryption by default</h3><p class="plain"><b>In plain words:</b> files saved in the storage bucket are scrambled so only the right people can read them.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/s3_lifecycle"><code>s3_lifecycle</code></a> bucket is always encrypted (AES256, or your KMS key if you give one), blocks all public access and refuses plain HTTP.</p></div>
-    <div class="step"><h3>Traffic failover</h3><p class="plain"><b>In plain words:</b> if one site goes down, visitors are sent to another one automatically.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/dr_failover"><code>dr_failover</code></a> module sets weighted Route 53 records with a health check per site. It rejects a single-site setup.</p></div>
-    <div class="step"><h3>Cost tagging</h3><p class="plain"><b>In plain words:</b> every cloud resource gets a label saying which team owns it, so the bill can be split fairly.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/cost_tagging"><code>cost_tagging</code></a> module adds a required-tags policy, cost allocation tags and per-team budgets.</p></div>
+    <div class="step"><h3>Encryption by default</h3><p class="plain"><b>Put simply:</b> files saved in the storage bucket are scrambled so only the right people can read them.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/s3_lifecycle"><code>s3_lifecycle</code></a> bucket is always encrypted (AES256, or your KMS key if you give one), blocks all public access and refuses plain HTTP.</p></div>
+    <div class="step"><h3>Traffic failover</h3><p class="plain"><b>Put simply:</b> if one site goes down, visitors are sent to another one automatically.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/dr_failover"><code>dr_failover</code></a> module sets weighted Route 53 records with a health check per site. It rejects a single-site setup.</p></div>
+    <div class="step"><h3>Cost tagging</h3><p class="plain"><b>Put simply:</b> every cloud resource gets a label saying which team owns it, so the bill can be split fairly.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/cost_tagging"><code>cost_tagging</code></a> module adds a required-tags policy, cost allocation tags and per-team budgets.</p></div>
   </div>
 </div></section>
 
