@@ -89,3 +89,53 @@ jobs:
             (cd "$unit" && terragrunt run -- init -backend=false -input=false -no-color \
               && terragrunt run -- validate -no-color)
           done
+
+  helm-chart:
+    name: Lint and test the Helm chart
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest pyyaml
+
+      - name: Lint
+        run: helm lint helm/charts/web-service --strict
+
+      - name: Render checks (pytest)
+        run: python -m pytest helm/tests -v
+
+      - name: Validate rendered manifests against the Kubernetes schemas
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz kubeconform
+          helm template rel helm/charts/web-service --kube-version 1.31.0 --set ingress.enabled=true \
+            | ./kubeconform -strict -summary -kubernetes-version 1.31.0
+
+  ansible-lint:
+    name: Lint the Ansible playbook
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible tooling
+        run: pip install ansible-core==2.17.5 ansible-lint
+
+      - name: Syntax check
+        working-directory: ansible
+        run: ansible-playbook playbooks/k8s-rolling-node-upgrade.yml --syntax-check -e target_version=1.31.4
+
+      - name: Lint (production profile)
+        working-directory: ansible
+        run: ansible-lint playbooks

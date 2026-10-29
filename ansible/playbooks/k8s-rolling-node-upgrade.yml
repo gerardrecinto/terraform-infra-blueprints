@@ -1,0 +1,170 @@
+---
+# Rolling kubeadm upgrade of Kubernetes worker nodes, one node at a time, health-gated.
+#
+# Assumes the control plane is already on target_version (upgrade it first, one node at a
+# time, with `kubeadm upgrade apply`). Each worker is cordoned, drained, upgraded, restarted,
+# verified and uncordoned before the next one starts. Any failure stops the whole run and
+# leaves the failed node cordoned so nothing is scheduled onto a half-upgraded node.
+#
+# Dry run:  ansible-playbook playbooks/k8s-rolling-node-upgrade.yml -e target_version=1.31.4 --check
+# Upgrade:  ansible-playbook playbooks/k8s-rolling-node-upgrade.yml -e target_version=1.31.4
+- name: Rolling kubeadm upgrade of worker nodes
+  hosts: k8s_workers
+  serial: 1
+  any_errors_fatal: true
+  become: true
+  gather_facts: true
+  vars:
+    # Kubernetes package version without the leading v, for example 1.31.4. No default on purpose:
+    # an upgrade should always name its target.
+    target_version: ""
+    # Debian package revision suffix as published in the pkgs.k8s.io repository for the minor version.
+    package_revision: "-1.1"
+    kube_node_name: "{{ inventory_hostname_short }}"
+    kubectl_host: "{{ groups['k8s_control_plane'][0] }}"
+    kubeconfig: /etc/kubernetes/admin.conf
+    drain_timeout: 300s
+    ready_retries: 40
+    ready_delay_seconds: 15
+  pre_tasks:
+    - name: Require an explicit target version in x.y.z form
+      ansible.builtin.assert:
+        that:
+          - target_version | length > 0
+          - target_version is match('^[0-9]+\.[0-9]+\.[0-9]+$')
+        fail_msg: "Set -e target_version=<x.y.z>, for example -e target_version=1.31.4"
+        quiet: true
+
+    - name: This playbook supports Debian-family nodes only
+      ansible.builtin.assert:
+        that: ansible_facts['os_family'] == "Debian"
+        fail_msg: "Unsupported OS family {{ ansible_facts['os_family'] }}; extend the package tasks first."
+        quiet: true
+
+    - name: Read the kubelet version currently running on this node
+      ansible.builtin.command: kubelet --version
+      register: kubelet_version_out
+      changed_when: false
+      check_mode: false
+
+    - name: Decide whether this node still needs the upgrade
+      ansible.builtin.set_fact:
+        needs_upgrade: "{{ ('v' ~ target_version) not in kubelet_version_out.stdout }}"
+
+    - name: Refuse to start while any other node is not Ready
+      ansible.builtin.command: >-
+        kubectl --kubeconfig {{ kubeconfig }} get nodes --no-headers
+      delegate_to: "{{ kubectl_host }}"
+      register: all_nodes
+      changed_when: false
+      check_mode: false
+      failed_when: >-
+        all_nodes.stdout_lines
+        | reject('match', '^' ~ kube_node_name ~ '\s')
+        | reject('search', '\sReady(,SchedulingDisabled)?\s')
+        | list | length > 0
+
+  tasks:
+    - name: Upgrade this node
+      when: needs_upgrade | bool
+      block:
+        - name: Cordon the node so nothing new is scheduled onto it
+          ansible.builtin.command: >-
+            kubectl --kubeconfig {{ kubeconfig }} cordon {{ kube_node_name }}
+          delegate_to: "{{ kubectl_host }}"
+          changed_when: true
+
+        - name: Drain the node, respecting PodDisruptionBudgets
+          ansible.builtin.command: >-
+            kubectl --kubeconfig {{ kubeconfig }} drain {{ kube_node_name }}
+            --ignore-daemonsets --delete-emptydir-data --timeout={{ drain_timeout }}
+          delegate_to: "{{ kubectl_host }}"
+          changed_when: true
+
+        - name: Release the package hold on kubeadm so it can be upgraded
+          ansible.builtin.dpkg_selections:
+            name: kubeadm
+            selection: install
+
+        - name: Install the target kubeadm
+          ansible.builtin.apt:
+            name: "kubeadm={{ target_version }}{{ package_revision }}"
+            update_cache: true
+            cache_valid_time: 600
+            allow_change_held_packages: true
+
+        - name: Hold kubeadm again
+          ansible.builtin.dpkg_selections:
+            name: kubeadm
+            selection: hold
+
+        - name: Upgrade the node configuration with kubeadm
+          ansible.builtin.command: kubeadm upgrade node
+          changed_when: true
+
+        - name: Release the package hold on kubelet and kubectl
+          ansible.builtin.dpkg_selections:
+            name: "{{ item }}"
+            selection: install
+          loop:
+            - kubelet
+            - kubectl
+
+        - name: Install the target kubelet and kubectl
+          ansible.builtin.apt:
+            name:
+              - "kubelet={{ target_version }}{{ package_revision }}"
+              - "kubectl={{ target_version }}{{ package_revision }}"
+            allow_change_held_packages: true
+
+        - name: Hold kubelet and kubectl again
+          ansible.builtin.dpkg_selections:
+            name: "{{ item }}"
+            selection: hold
+          loop:
+            - kubelet
+            - kubectl
+
+        - name: Restart the kubelet on the new version
+          ansible.builtin.systemd_service:
+            name: kubelet
+            state: restarted
+            daemon_reload: true
+
+        - name: Wait for the node to report Ready
+          ansible.builtin.command: >-
+            kubectl --kubeconfig {{ kubeconfig }} get node {{ kube_node_name }}
+            -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+          delegate_to: "{{ kubectl_host }}"
+          register: node_ready
+          until: node_ready.stdout == "True"
+          retries: "{{ ready_retries }}"
+          delay: "{{ ready_delay_seconds }}"
+          changed_when: false
+
+        - name: Confirm the kubelet reports the target version
+          ansible.builtin.command: >-
+            kubectl --kubeconfig {{ kubeconfig }} get node {{ kube_node_name }}
+            -o jsonpath='{.status.nodeInfo.kubeletVersion}'
+          delegate_to: "{{ kubectl_host }}"
+          register: node_version
+          changed_when: false
+          failed_when: node_version.stdout != 'v' ~ target_version
+
+        - name: Uncordon the node so workloads can return
+          ansible.builtin.command: >-
+            kubectl --kubeconfig {{ kubeconfig }} uncordon {{ kube_node_name }}
+          delegate_to: "{{ kubectl_host }}"
+          changed_when: true
+
+      rescue:
+        - name: Stop the run and leave the node cordoned for inspection
+          ansible.builtin.fail:
+            msg: >-
+              Upgrade of {{ kube_node_name }} failed and the node was left cordoned. Inspect it,
+              fix the cause, then rerun; nodes already at v{{ target_version }} are skipped.
+
+    - name: Report nodes that were already on the target version
+      ansible.builtin.debug:
+        msg: "{{ kube_node_name }} already runs v{{ target_version }}; skipped."
+      when: not (needs_upgrade | bool)
