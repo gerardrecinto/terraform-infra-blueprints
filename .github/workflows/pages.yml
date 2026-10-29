@@ -27,7 +27,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          cp site/index.html _site/
+          cp site/index.html site/og.png _site/
           python3 - . _site/catalog.json <<'PY'
           import json, os, re, sys
           root, out = sys.argv[1], sys.argv[2]
@@ -62,9 +62,9 @@ jobs:
                       if not tf: continue
                       vars_ = []
                       for (lab,), body in blocks(tf, 'variable'):
-                          d = re.search(r'description\s*=\s*"((?:[^"\\]|\\.)*)"', body)
+                          d = re.search(r'description\s*=\s*"((?:[^"\\]|\\.)*)"', body) or re.search(r'description\s*=\s*<<-?(\w+)\n(.*?)\n\s*\1', body, re.S)
                           t = re.search(r'^\s*type\s*=\s*(.+)$', body, re.M)
-                          vars_.append({'name': lab, 'desc': d.group(1) if d else '', 'type': clean(t.group(1))[:40] if t else '',
+                          vars_.append({'name': lab, 'desc': clean(d.group(d.lastindex if d.re.groups == 1 else 2)) if d else '', 'type': clean(t.group(1))[:40] if t else '',
                                         'required': not re.search(r'^\s*default\s*=', body, re.M), 'validated': bool(re.search(r'^\s*validation\s*\{', body, re.M))})
                       res = sorted({l[0] for l, _ in blocks(tf, 'resource')})
                       outs = [l[0] for l, _ in blocks(tf, 'output')]
