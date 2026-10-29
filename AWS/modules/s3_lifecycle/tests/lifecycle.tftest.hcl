@@ -9,7 +9,7 @@ variables {
 run "default_schedule" {
   command = plan
   assert {
-    condition = length([for r in aws_s3_bucket_lifecycle_configuration.this.rule : r if r.id == "log-tiering"]) == 1
+    condition     = length([for r in aws_s3_bucket_lifecycle_configuration.this.rule : r if r.id == "log-tiering"]) == 1
     error_message = "The default tiering rule must remain enabled."
   }
 }
@@ -17,9 +17,9 @@ run "default_schedule" {
 run "valid_custom_schedule" {
   command = plan
   variables {
-    transition_to_ia_days = 45
+    transition_to_ia_days      = 45
     transition_to_glacier_days = 75
-    expiration_days = 365
+    expiration_days            = 365
   }
 }
 
