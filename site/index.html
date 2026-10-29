@@ -8,6 +8,17 @@
 <meta property="og:title" content="terraform-infra-blueprints">
 <meta property="og:description" content="Browse every Terraform module and workflow across AWS, Azure, GCP, AliCloud, OpenStack and on-prem, generated from the source on each deploy, with input and validation counts.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://gerardrecinto.github.io/terraform-infra-blueprints/">
+<meta property="og:image" content="https://gerardrecinto.github.io/terraform-infra-blueprints/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="terraform-infra-blueprints: Terraform modules for Kubernetes, storage tiering, private connectivity and observability">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="terraform-infra-blueprints">
+<meta name="twitter:description" content="Browse every Terraform module and workflow across AWS, Azure, GCP, AliCloud, OpenStack and on-prem, generated from the source on each deploy, with input and validation counts.">
+<meta name="twitter:image" content="https://gerardrecinto.github.io/terraform-infra-blueprints/og.png">
+<meta name="theme-color" content="#14b8a6">
+<link rel="canonical" href="https://gerardrecinto.github.io/terraform-infra-blueprints/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314b8a6'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
 <style>
 
@@ -15,7 +26,8 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#2dd4bf;--brand-bg:#062f2b;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}}
 :root[data-theme=dark]{--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#2dd4bf;--brand-bg:#062f2b;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+section{scroll-margin-top:64px}
+.skip{position:absolute;left:8px;top:-60px;background:var(--panel);color:var(--fg);padding:8px 14px;border-radius:8px;z-index:9;border:2px solid #14b8a6}.skip:focus{top:8px}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:var(--brand)}
 code,pre,textarea,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
@@ -99,6 +111,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .m button.more{all:unset;cursor:pointer;color:var(--brand);font-size:13px;text-decoration:underline;margin-top:6px;display:inline-block}
 .m table{min-width:0;font-size:12.5px;margin-top:8px;display:block;overflow-x:auto}
 .m td,.m th{padding:6px 8px}
+.m button.more:focus-visible{outline:2px solid #14b8a6;outline-offset:2px;border-radius:4px}
+.qs{margin-bottom:16px}.qs pre{margin-bottom:8px}.copy{display:block;margin-left:auto;font:600 13px system-ui;padding:8px 14px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;cursor:pointer}
+.plain{color:var(--fg);margin:0 0 12px;font-size:15px}.step .plain{font-size:14px}.status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .cl{font:700 11px ui-monospace,monospace;padding:2px 8px;border-radius:6px;background:var(--brand-bg);color:var(--brand);margin-left:6px;vertical-align:middle}
 .cl.wf{background:var(--panel2);color:var(--mute)}
 .bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;margin:6px 0}
@@ -109,27 +124,43 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .kpi span{color:var(--mute);font-size:13px}
 .cnt{color:var(--mute);font-size:13px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-pre.live{background:var(--code);color:var(--code-fg);padding:14px 16px;border-radius:12px;overflow-x:auto;font-size:12.5px;margin:0}
+@media (prefers-reduced-motion:no-preference){
+html{scroll-behavior:smooth}
+.btn,.step,.m,.kpi,.chip,.copy{transition:transform .18s ease-out}
+.btn:hover,.step:hover,.m:hover,.kpi:hover{transform:translateY(-2px)}
+.btn:active,.chip:active,.copy:active{transform:scale(.97)}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .5s ease-out,transform .5s ease-out}
+.rv.in{opacity:1;transform:none}
+.step.rv:nth-child(2){transition-delay:.08s}.step.rv:nth-child(3){transition-delay:.16s}
+@supports (animation-timeline:view()){
+.hero .wrap{animation:heroOut linear both;animation-timeline:view();animation-range:exit 0% exit 90%}
+@keyframes heroOut{to{opacity:.5;transform:scale(.97) translateY(-14px)}}
+}
+}
 </style>
 </head>
 <body>
-<nav><div class="wrap">
-  <a class="logo" href="#top"><i></i>terraform-infra-blueprints</a>
-  <div class="links"><a href="#try" class="hide-s">Catalog</a><a href="#install" class="hide-s">Install</a><a class="btn" href="https://github.com/gerardrecinto/terraform-infra-blueprints">GitHub</a></div>
+<a class="skip" href="#try">Skip to the catalog</a>
+<nav aria-label="Primary"><div class="wrap">
+  <a class="logo" href="#top"><i aria-hidden="true"></i>terraform-infra-blueprints</a>
+  <div class="links"><a href="#try" class="hide-s">Catalog</a><a href="#install" class="hide-s">Quick start</a><a class="btn" href="https://github.com/gerardrecinto/terraform-infra-blueprints">GitHub</a></div>
 </div></nav>
 
+<main>
 <header class="hero" id="top"><div class="wrap">
   <h1>Infrastructure code that rejects bad input at <em>plan time</em>.</h1>
-  <p class="lede">Reusable Terraform modules and workflows for Kubernetes, storage tiering, private connectivity and observability across six platforms, with a Terragrunt layer for running one workflow in many environments. Browse all of it here.</p>
-  <div class="cta"><a class="btn primary" href="#try">Browse the catalog</a><a class="btn" href="#install">Use a module</a></div>
-  <div class="stats"><div><b>6</b>platforms</div><div><b id="n-in">510</b>inputs, counted from source</div><div><b>0</b>accounts touched here</div></div>
+  <p class="lede">Ready-made Terraform building blocks for Kubernetes, storage, private networking and monitoring on six platforms. Made for platform and DevOps engineers who want reviewed starting points to read and adapt.</p>
+  <div class="cta"><a class="btn primary" href="#try">Browse the catalog</a><a class="btn" href="#install">Quick start</a></div>
+  <div class="stats"><div><b>6</b>platforms</div><div><b id="n-in">500+</b>inputs, counted from source</div><div><b>0</b>accounts touched here</div></div>
 </div></header>
 
 
 <section id="try"><div class="wrap">
-  <h2>Browse every module, read straight from the code</h2>
-  <p class="sub">The catalog below is generated from the <code>.tf</code> files on every deploy, so the counts cannot drift from the repo. Search, filter by cloud, and open a module to see its inputs. The numbers at the top are computed, not typed.</p>
+  <h2>Browse every module</h2>
+  <p class="plain">This is a searchable list of every building block in the project, and what each one can be set up with.</p>
+  <p class="sub">Generated from the <code>.tf</code> files on every deploy, so the counts match the code. Search, filter by cloud, and open a module to see its inputs.</p>
   <div class="kpis" id="kpis"><div class="status" id="boot">Loading the catalog...</div></div>
+  <noscript><p class="status">The catalog needs JavaScript. The full module list is in the <a href="https://github.com/gerardrecinto/terraform-infra-blueprints#structure">README</a>.</p></noscript>
   <div class="tools2"><label class="sr" for="q">Search</label><input id="q" type="search" placeholder="Search modules, variables or resource types, e.g. lifecycle, eks, privatelink">
     <span class="chips" id="clouds" role="group" aria-label="Filter by cloud"></span>
     <span class="chips" role="group" aria-label="Filter by kind"><button class="chip" data-k="all" aria-pressed="true">All</button><button class="chip" data-k="module" aria-pressed="false">Modules</button><button class="chip" data-k="workflow" aria-pressed="false">Workflows</button></span></div>
@@ -137,57 +168,54 @@ pre.live{background:var(--code);color:var(--code-fg);padding:14px 16px;border-ra
   <div class="grid" id="grid"></div>
 </div></section>
 
-<section><div class="wrap">
-  <h2>Design principles</h2>
-  <p class="sub">The README's five rules, in short.</p>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><h3>Everything in Terraform</h3><p>Helm release versions, ConfigMaps, IAM, alert rules and cleanup tasks are resources. If it cannot be reviewed in a PR and reverted, it does not exist in production.</p></div>
-    <div class="step"><div class="n">2</div><h3>Converge ephemeral state</h3><p>Pod IPs change. Modules query live cluster state and reconcile load balancer targets to match, so each apply is a reconciliation loop.</p></div>
-    <div class="step"><div class="n">3</div><h3>Fail at plan time</h3><p>Every input has a description. Inputs with a real constraint have a validation block, so a bad environment name is rejected by <code>plan</code>, not by a provider an hour in.</p></div>
-  </div>
-</div></section>
-
-<section><div class="wrap">
-  <h2>One workflow, many environments</h2>
-  <p class="sub">A Terragrunt layer runs the same workflow for dev and prod without copying it. These are the live units found in the repo.</p>
-  <pre class="live" id="live"></pre>
-</div></section>
-
 <section id="install" class="install"><div class="wrap">
-  <h2>Use a module</h2>
-  <p class="sub">Terraform 1.7 or later. Replace every placeholder with your own values.</p>
+  <h2>Quick start</h2>
+  <p class="plain">Download the project and have Terraform check one building block, without touching any cloud account.</p>
+  <p class="sub">Needs git and Terraform 1.7 or later. This clones the repo and validates one module. It does not need cloud credentials and creates nothing.</p>
+  <div class="qs">
+<pre id="qs-code">git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
+cd terraform-infra-blueprints/AWS/modules/s3_lifecycle
+terraform init -backend=false
+terraform validate</pre>
+  </div>
   <div class="cols2">
     <div>
+      <p class="note">To use a module from your own configuration, point <code>source</code> at a pinned release tag and replace the values with your own:</p>
 <pre>module "log_archive" {
-  source = "./AWS/modules/s3_lifecycle"
+  source = "github.com/gerardrecinto/terraform-infra-blueprints//AWS/modules/s3_lifecycle?ref=v1.3.0"
 
-  bucket_name = "app-logs-prod"
+  bucket_name = "your-unique-bucket-name"
   environment = "prod"
   log_prefix  = "logs/"
 }</pre>
     </div>
     <div>
+      <p class="note">Repo-wide checks, run from the repo root:</p>
 <pre>terraform fmt -check -recursive
-terraform init -backend=false
-terraform validate
 trivy config .</pre>
-      <p class="note">CI runs fmt, validate and a Trivy IaC scan across the modules.</p>
+      <p class="note">CI runs fmt, validate and a Trivy IaC scan across the modules, helm lint and render tests on the chart, and ansible-lint on the playbook.</p>
     </div>
   </div>
 </div></section>
 
-<section><div class="wrap">
-  <div class="limits">
-    <strong>What this does not do</strong>
-    <ul>
-      <li>This is a personal portfolio repository. The README says every name, account ID and metric was replaced with generic placeholders.</li>
-      <li>The catalog reads variables and resource types with a pattern scan. It is not a Terraform parser, so a variable declared in an unusual way could be missed.</li>
-      <li>Validating a module is not the same as applying it. Nothing here claims a live deployment.</li>
-    </ul>
+<section id="inside"><div class="wrap">
+  <h2>Three things worth looking at</h2>
+  <p class="sub">Small examples of how the modules are built. Each one links to its code.</p>
+  <div class="steps">
+    <div class="step"><h3>Encryption by default</h3><p class="plain">Files saved in the storage bucket are scrambled so only the right people can read them.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/s3_lifecycle"><code>s3_lifecycle</code></a> bucket is always encrypted (AES256, or your KMS key if you give one), blocks all public access and refuses plain HTTP.</p></div>
+    <div class="step"><h3>Traffic failover</h3><p class="plain">If one site goes down, visitors are sent to another one automatically.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/dr_failover"><code>dr_failover</code></a> module sets weighted Route 53 records with a health check per site. It rejects a single-site setup.</p></div>
+    <div class="step"><h3>Cost tagging</h3><p class="plain">Every cloud resource gets a label saying which team owns it, so the bill can be split fairly.</p><p>The <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/tree/main/AWS/modules/cost_tagging"><code>cost_tagging</code></a> module adds a required-tags policy, cost allocation tags and per-team budgets.</p></div>
   </div>
 </div></section>
 
-
+<section id="status"><div class="wrap">
+  <h2>What is checked, and what is not</h2>
+  <div class="status-grid">
+    <div class="step"><h3>Checked in CI</h3><p>Formatting, <code>terraform validate</code> with no backend, a Trivy scan, Terragrunt validation, Helm lint and render tests, and ansible-lint.</p></div>
+    <div class="step"><h3>Not done</h3><p>No module has been applied to a live account from this repo, and no production result is claimed. This is a personal portfolio with placeholder names. The catalog reads files with a pattern scan, not a Terraform parser.</p></div>
+  </div>
+</div></section>
+</main>
 <footer><div class="wrap">
   <span>terraform-infra-blueprints. MIT licensed. Built by <a href="https://github.com/gerardrecinto">Gerard Recinto</a>.</span>
   <span><a href="https://github.com/gerardrecinto/terraform-infra-blueprints">Source</a> &middot; <a href="https://github.com/gerardrecinto/terraform-infra-blueprints/releases">Releases</a></span>
@@ -217,6 +245,15 @@ trivy config .</pre>
   $("grid").addEventListener("click", (e) => { const b = e.target.closest(".more"); if (!b) return; const p = b.dataset.p; open.has(p) ? open.delete(p) : open.add(p); draw(); track("tf_open"); });
   $("q").addEventListener("input", draw);
   document.querySelectorAll("[data-k]").forEach((b) => b.addEventListener("click", () => { kind = b.dataset.k; document.querySelectorAll("[data-k]").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); }));
+  const cp = document.querySelector("#qs-code");
+  if (cp) { const bt = document.createElement("button"); bt.type = "button"; bt.className = "copy"; bt.textContent = "Copy"; bt.setAttribute("aria-label", "Copy the quick start commands");
+    bt.onclick = () => { const done = (t) => { bt.textContent = t; setTimeout(() => { bt.textContent = "Copy"; }, 1800); };
+      (navigator.clipboard ? navigator.clipboard.writeText(cp.textContent) : Promise.reject()).then(() => done("Copied"), () => { const r = document.createRange(); r.selectNodeContents(cp); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); done("Press Ctrl+C"); }); };
+    cp.parentNode.appendChild(bt); }
+  if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion:reduce)").matches) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll("section h2, section .sub, .step, .limits, .qs, .install .cols2 ").forEach((el) => { el.classList.add("rv"); io.observe(el); });
+  }
   fetch("catalog.json").then((r) => r.json()).then((d) => {
     mods = d.modules;
     const vars = mods.reduce((a, m) => a + m.variables.length, 0), val = mods.reduce((a, m) => a + m.variables.filter((x) => x.validated).length, 0), desc = mods.reduce((a, m) => a + m.variables.filter((x) => x.desc).length, 0);
@@ -224,7 +261,7 @@ trivy config .</pre>
     $("kpis").innerHTML = [[mods.length, "modules and workflows"], [vars, "input variables"], [Math.floor((100 * desc) / vars) + "%", "have a description"], [Math.floor((100 * val) / vars) + "%", "have a validation block"], [types, "resource types used"]].map(([n, l]) => `<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("");
     $("clouds").innerHTML = ['<button class="chip" data-c="all" aria-pressed="true">All clouds</button>'].concat(clouds.map((c) => `<button class="chip" data-c="${esc(c)}" aria-pressed="false">${esc(c)}</button>`)).join("");
     $("clouds").addEventListener("click", (e) => { const b = e.target.closest("[data-c]"); if (!b) return; cloud = b.dataset.c; document.querySelectorAll("#clouds .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); draw(); track("tf_cloud"); });
-    $("n-in").textContent = vars; $("live").textContent = d.live.map((p) => "live/" + p).join("\n");
+    $("n-in").textContent = vars;
     draw(); window.__TF_READY__ = true;
   }).catch(() => { $("kpis").innerHTML = '<div class="status">The catalog did not load. The README has the full module list.</div>'; });
 })();

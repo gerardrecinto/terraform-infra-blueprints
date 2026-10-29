@@ -1,27 +1,32 @@
-# Terraform
+# terraform-infra-blueprints
 
-![Terraform Platform IaC logo](docs/assets/logo.svg)
+**New here?** A library of ready-made building blocks for setting up cloud servers, storage and networks, written as code so a team can review and reuse them.
 
-Infrastructure-as-code across on-premises, AWS, Azure, GCP, AliCloud, and OpenStack. Reusable modules and environment-specific workflows covering EKS, AKS, GKE, ACK, Magnum, Apigee, PrivateLink, S3/OSS/Swift tiering, observability, and logging pipelines, with a Terragrunt layer for running the same workflow across multiple environments without copy-pasting it.
+It is for platform and DevOps engineers who want reviewed Terraform modules to read, validate and adapt on AWS, Azure, GCP, AliCloud, OpenStack and on-prem. Browse the catalog: https://gerardrecinto.github.io/terraform-infra-blueprints/
 
-![Terraform](https://img.shields.io/badge/Terraform-1.7%2B-7B42BC?logo=terraform&logoColor=white)
-![Terragrunt](https://img.shields.io/badge/Terragrunt-multi--env-4A4A4A?logo=terraform&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-EKS%20%7C%20S3%20%7C%20OpenSearch-FF9900?logo=amazon-aws&logoColor=white)
-![Azure](https://img.shields.io/badge/Azure-AKS%20%7C%20ACR-0089D6?logo=microsoft-azure&logoColor=white)
-![GCP](https://img.shields.io/badge/GCP-GKE%20%7C%20Apigee%20X-4285F4?logo=google-cloud&logoColor=white)
-![AliCloud](https://img.shields.io/badge/AliCloud-ACK%20%7C%20OSS-FF6A00?logo=alibabacloud&logoColor=white)
-![OpenStack](https://img.shields.io/badge/OpenStack-Magnum%20%7C%20Octavia-ED1944?logo=openstack&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+## Try it in 60 seconds
 
-<img src="docs/assets/demo.gif" alt="Real terminal recording: terraform fmt -check across every module in this repo, then a trivy IaC security scan (config from trivy.yaml) that actually catches misconfigurations in secure-connectivity" width="820" />
+```bash
+git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
+cd terraform-infra-blueprints/AWS/modules/s3_lifecycle
+terraform init -backend=false
+terraform validate
+```
 
-Commercial angle and consulting hooks: [docs/go-to-market.md](docs/go-to-market.md).
+This needs git and Terraform 1.7 or later. It uses no cloud credentials and creates nothing. I ran `terraform init -backend=false` and `terraform validate` on `AWS/modules/s3_lifecycle` in a checkout of this repo and it reported a valid configuration, using Terraform 1.5.7. I did not re-run the `git clone` step from scratch, and I have not run it on Terraform 1.7 or later (CI uses 1.9). The first `init` downloads the AWS provider, which can take a few minutes.
 
-> **Note:** This is a personal portfolio repository. Module design and provisioning patterns are original implementations inspired by common enterprise infrastructure problems. All company names, internal system names, account IDs, hostnames, ARNs, VPC CIDRs, and business metrics have been removed or replaced with generic placeholders — none of the figures or names in this repository refer to a real employer, deployment, or production outcome.
+## What it does and does not do
 
----
+Does:
+- Gives you modules and workflows for Kubernetes, storage tiering, private connectivity and observability, with every input described and many checked at plan time.
+- Checks itself in CI: formatting, `terraform validate`, a Trivy misconfiguration scan, Terragrunt validation, Helm lint and render tests, and ansible-lint.
 
-## Design principles
+Does not:
+- Prove any module works in a real account. Nothing here has been applied as part of this repo, and no production result is claimed.
+- Replace your own review. Treat everything as a reviewed starting point.
+
+<details>
+<summary><b>Design principles</b></summary>
 
 **Separation of concerns at every layer.** Helm release versions, replica counts, and chart config live in Terraform, not ad-hoc `helm upgrade` commands. ConfigMaps that drive runtime behavior are Terraform resources with full audit trail and PR-based change control.
 
@@ -31,11 +36,12 @@ Commercial angle and consulting hooks: [docs/go-to-market.md](docs/go-to-market.
 
 **Everything version-controlled, nothing click-ops.** IAM roles, Cognito federation, Grafana alert rules, ACR cleanup tasks: all Terraform resources. If it can't be reviewed in a PR and rolled back with a revert, it doesn't exist in production.
 
-**Bad input fails at plan time, not three resources deep in a provider error.** Every one of the 510 input variables across every module and workflow in this repo has a `description`, and the ones with a real constraint (environments, CIDR blocks, retention windows, percentage thresholds, SQS/Log Analytics service limits) have a `validation` block enforcing it. `terraform plan` should tell you `environment must be one of: dev, staging, prod`, not fail an hour later on a resource that silently accepted garbage.
+**Bad input fails at plan time, not three resources deep in a provider error.** Every one of the 534 input variables across every module and workflow in this repo has a `description`, and the ones with a real constraint (environments, CIDR blocks, retention windows, percentage thresholds, SQS/Log Analytics service limits) have a `validation` block enforcing it. `terraform plan` should tell you `environment must be one of: dev, staging, prod`, not fail an hour later on a resource that silently accepted garbage.
 
----
+</details>
 
-## Structure
+<details>
+<summary><b>Structure</b></summary>
 
 ```
 AWS/
@@ -101,9 +107,10 @@ live/
 └── azure/{dev,prod}/aks_logging/           dev + prod units for Azure/workflows/deploy_aks_logging
 ```
 
----
+</details>
 
-## AWS Modules
+<details>
+<summary><b>AWS Modules</b></summary>
 
 ### `modules/s3_lifecycle`
 
@@ -230,9 +237,10 @@ module "traffic" {
 
 Procedure and abort criteria: [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md).
 
----
+</details>
 
-## Azure
+<details>
+<summary><b>Azure</b></summary>
 
 ### `modules/aks`
 
@@ -250,13 +258,14 @@ Example telemetry logging stack:
 | OpenSearch (on AKS) | Log storage and full-text search |
 | Grafana | Dashboards, internal LoadBalancer |
 
----
+</details>
 
-## GCP
+<details>
+<summary><b>GCP</b></summary>
 
 ### `modules/apigee`
 
-Apigee X setup with org/env/instance provisioning. Proxy bundles are rendered from templates via `archive_file`. Each bundle includes JS-ValidateToken (Bearer token introspection), JS-PathRouter (dynamic `target.url`), and SpikeArrest (600 req/min) — a pattern for consolidating many single-purpose API proxies into fewer parameterized ones, reducing duplicated auth and routing logic across an org.
+Apigee X setup with org/env/instance provisioning. Proxy bundles are rendered from templates via `archive_file`. Each bundle includes JS-ValidateToken (Bearer token introspection), JS-PathRouter (dynamic `target.url`), and SpikeArrest (600 req/min). This is a pattern for consolidating many single-purpose API proxies into fewer parameterized ones, reducing duplicated auth and routing logic across an org.
 
 ### `modules/gke`
 
@@ -272,9 +281,10 @@ Three example proxies showing the path-routing and token-auth pattern:
 | package-api | `/package-api/v2` | `/packages`, `/download`, `/catalog`, `/releases` |
 | inference-api | `/inference-api/v2` | `/models`, `/inference`, `/benchmarks`, `/compile`, `/profile` |
 
----
+</details>
 
-## AliCloud
+<details>
+<summary><b>AliCloud</b></summary>
 
 ### `modules/ack`
 
@@ -292,9 +302,10 @@ API group and throttled routes fronting backend services, consolidating per-serv
 
 Composes all three: an ACK cluster with a general pool and a tainted batch pool, an OSS bucket for cluster logs on a short retention schedule, and an internal API Gateway route fronting the cluster's status endpoint.
 
----
+</details>
 
-## OpenStack
+<details>
+<summary><b>OpenStack</b></summary>
 
 ### `modules/magnum_k8s`
 
@@ -312,9 +323,10 @@ Standalone Octavia load balancer with an HTTPS listener, a round-robin backend p
 
 Composes all three: a Magnum cluster sized by environment (3 masters in prod, 1 elsewhere), a Swift container for backups, and an Octavia load balancer fronting the cluster's ingress nodes.
 
----
+</details>
 
-## Terragrunt
+<details>
+<summary><b>Terragrunt</b></summary>
 
 The `workflows/` directories above are plain Terraform root modules: each one is runnable on its own with its own `terraform init`. `live/` is a thin Terragrunt layer on top of six of them, for the actual reason teams reach for Terragrunt: running the same workflow for more than one environment without copy-pasting the whole module tree per environment.
 
@@ -337,23 +349,23 @@ Two things worth knowing if you try this yourself:
 
 Every leaf here was run through `terragrunt run -- init -backend=false` and `terragrunt run -- validate` for real, plus `terragrunt hcl format --check` and `terragrunt hcl validate` across the whole `live/` tree, the same verification discipline as every other module in this repo.
 
----
+</details>
 
-## secure-connectivity/
+<details>
+<summary><b>secure-connectivity/</b></summary>
 
-A separate, self-contained portfolio: five pieces of AWS connectivity
-infrastructure (public NGINX service, private SSM-only compute access, an
-optional hardened access gateway, and two environment-orchestration
-capstones that compose the modules together). Built to demonstrate
-public-vs-private trust boundaries, identity-aware administrative access,
-and module composition specifically -- see
-[secure-connectivity/PROGRESS.md](secure-connectivity/PROGRESS.md) for build
-status and [secure-connectivity/docs/interview-guide.md](secure-connectivity/docs/interview-guide.md)
-(once written) for the design-decision writeups.
+Four AWS connectivity modules: a public NGINX service, private SSM-only
+compute access, an optional hardened access gateway, and a shared network
+module. They show public-vs-private trust boundaries, identity-aware
+administrative access and module composition. The two environment
+capstones and the interview guide that the build plan mentions are not in
+the repo yet; see [secure-connectivity/PROGRESS.md](secure-connectivity/PROGRESS.md)
+for build status.
 
----
+</details>
 
-## Helm chart
+<details>
+<summary><b>Helm chart</b></summary>
 
 [`helm/charts/web-service`](helm/charts/web-service/) deploys a stateless HTTP service on Kubernetes and EKS with the settings that usually get missed: `maxUnavailable: 0` rolling updates with `progressDeadlineSeconds`, startup, liveness and readiness probes, graceful shutdown with a `preStop` sleep, an HPA with a slow scale-down, a PodDisruptionBudget, zone and node spread, a default-deny style NetworkPolicy, a restricted pod security context, IRSA through `serviceAccount.roleArn`, image pinning by digest, and a values schema. 18 pytest checks render the chart and assert these properties (`python -m pytest helm/tests`).
 
@@ -363,15 +375,34 @@ helm upgrade --install web helm/charts/web-service -n web --create-namespace \
   --set serviceAccount.roleArn=arn:aws:iam::<account>:role/web
 ```
 
-## Ansible
+</details>
+
+<details>
+<summary><b>Ansible</b></summary>
 
 [`ansible/playbooks/k8s-rolling-node-upgrade.yml`](ansible/) upgrades kubeadm workers one at a time with a health gate between nodes and leaves a failed node cordoned. Checked with `ansible-lint` (production profile) in CI; not run against a real cluster from this repository.
 
-## Compliance and operations notes
+</details>
+
+<details>
+<summary><b>Compliance and operations notes</b></summary>
 
 - [docs/compliance-controls-map.md](docs/compliance-controls-map.md): where SOC 2, PCI DSS and SOX control areas line up with these modules (supports evidence gathering; not a compliance claim).
 - [docs/threat-model-web-service.md](docs/threat-model-web-service.md): STRIDE walk-through for the reference stack.
 - [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md): planned site drain and rehearsal.
+
+</details>
+
+<details>
+<summary><b>Demo recording and notes</b></summary>
+
+<img src="docs/assets/demo.gif" alt="Real terminal recording: terraform fmt -check across every module in this repo, then a trivy IaC security scan (config from trivy.yaml) that actually catches misconfigurations in secure-connectivity" width="820" />
+
+> **Note:** This is a personal portfolio repository. Module design and provisioning patterns are original implementations inspired by common enterprise infrastructure problems. All company names, internal system names, account IDs, hostnames, ARNs, VPC CIDRs, and business metrics have been removed or replaced with generic placeholders. None of the figures or names in this repository refer to a real employer, deployment, or production outcome.
+
+Commercial angle and consulting hooks: [docs/go-to-market.md](docs/go-to-market.md).
+
+</details>
 
 ## License
 
