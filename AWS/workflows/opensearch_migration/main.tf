@@ -48,6 +48,26 @@ resource "aws_s3_bucket" "migration_snapshots" {
   tags   = local.tags
 }
 
+# A customer-managed key makes snapshot encryption and its reader permissions
+# explicit in the configuration, independent of S3's service-managed default.
+resource "aws_kms_key" "migration_snapshots" {
+  description             = "Encrypt ${var.domain_name} migration snapshots"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+  tags                    = local.tags
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "migration_snapshots" {
+  bucket = aws_s3_bucket.migration_snapshots.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.migration_snapshots.arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "migration_snapshots" {
   bucket                  = aws_s3_bucket.migration_snapshots.id
   block_public_acls       = true
@@ -85,6 +105,11 @@ resource "aws_iam_role_policy" "snapshot_restore" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
         Resource = "${aws_s3_bucket.migration_snapshots.arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+        Resource = aws_kms_key.migration_snapshots.arn
       }
     ]
   })
