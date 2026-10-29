@@ -92,14 +92,15 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
-# Enforce KMS encryption and deny HTTP -- satisfies AppSec requirements
+# Deny HTTP always. With a KMS key set, also deny PutObject that does not use that key.
+# Without a key the second statement is omitted (it used to be an Allow for "*", which grants public writes).
 resource "aws_s3_bucket_policy" "this" {
   count  = var.enforce_encryption_policy ? 1 : 0
   bucket = aws_s3_bucket.this.id
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Sid       = "DenyNonHTTPS"
         Effect    = "Deny"
@@ -113,20 +114,20 @@ resource "aws_s3_bucket_policy" "this" {
           Bool = { "aws:SecureTransport" = "false" }
         }
       },
-      # If KMS is configured, deny any PutObject that doesn't use the specified key
+      ], var.kms_key_arn != "" ? [
       {
         Sid       = "DenyNonKMSEncryption"
-        Effect    = var.kms_key_arn != "" ? "Deny" : "Allow"
+        Effect    = "Deny"
         Principal = "*"
         Action    = "s3:PutObject"
         Resource  = "${aws_s3_bucket.this.arn}/*"
-        Condition = var.kms_key_arn != "" ? {
+        Condition = {
           StringNotEquals = {
             "s3:x-amz-server-side-encryption-aws-kms-key-id" = var.kms_key_arn
           }
-        } : {}
+        }
       }
-    ]
+    ] : [])
   })
 }
 
