@@ -30,19 +30,19 @@ variable "transition_to_ia_days" {
   default     = 30
 
   validation {
-    condition     = var.transition_to_ia_days >= 0
-    error_message = "transition_to_ia_days must be zero or greater."
+    condition     = var.transition_to_ia_days >= 30 && floor(var.transition_to_ia_days) == var.transition_to_ia_days
+    error_message = "transition_to_ia_days must be a whole number of at least 30 days, as required for Standard-IA."
   }
 }
 
 variable "transition_to_glacier_days" {
-  description = "Days in Standard-IA before archiving to Glacier Deep Archive; must exceed transition_to_ia_days"
+  description = "Object age in days before archiving to Glacier Deep Archive; must be at least 30 days after transition_to_ia_days"
   type        = number
   default     = 90
 
   validation {
-    condition     = var.transition_to_glacier_days >= 0
-    error_message = "transition_to_glacier_days must be zero or greater."
+    condition     = var.transition_to_glacier_days >= 1 && floor(var.transition_to_glacier_days) == var.transition_to_glacier_days
+    error_message = "transition_to_glacier_days must be a positive whole number of days."
   }
 }
 
@@ -52,8 +52,8 @@ variable "expiration_days" {
   default     = 0
 
   validation {
-    condition     = var.expiration_days >= 0
-    error_message = "expiration_days must be zero or greater (0 disables expiration)."
+    condition     = var.expiration_days >= 0 && floor(var.expiration_days) == var.expiration_days
+    error_message = "expiration_days must be a whole number of zero or greater (0 disables expiration)."
   }
 }
 

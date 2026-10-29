@@ -23,7 +23,7 @@ variable "required_tags" {
 }
 
 variable "enforced_resource_types" {
-  description = "Resource types that must carry the required tags"
+  description = "Resource types on which tag compliance is enforced when these tag keys are supplied; missing tags are not required by this policy"
   type        = list(string)
   default = [
     "ec2:instance",

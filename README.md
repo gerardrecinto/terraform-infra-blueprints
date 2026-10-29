@@ -4,7 +4,7 @@
 
 It is for platform and DevOps engineers who want reviewed Terraform modules to read, validate and adapt on AWS, Azure, GCP, AliCloud, OpenStack and on-prem. Browse the catalog: https://gerardrecinto.github.io/terraform-infra-blueprints/
 
-## Try it in 60 seconds
+## Validate one module
 
 ```bash
 git clone https://github.com/gerardrecinto/terraform-infra-blueprints.git
@@ -13,7 +13,7 @@ terraform init -backend=false
 terraform validate
 ```
 
-This needs git and Terraform 1.7 or later. It uses no cloud credentials and creates nothing. I ran `terraform init -backend=false` and `terraform validate` on `AWS/modules/s3_lifecycle` in a checkout of this repo and it reported a valid configuration, using Terraform 1.5.7. I did not re-run the `git clone` step from scratch, and I have not run it on Terraform 1.7 or later (CI uses 1.9). The first `init` downloads the AWS provider, which can take a few minutes.
+This needs git and Terraform 1.7 or later. It uses no cloud credentials and creates nothing. The first `init` downloads the AWS provider and can take a few minutes. CI runs this module validation and the credential-free mocked plan tests below on Terraform 1.9.8.
 
 ## What it does and does not do
 
@@ -128,6 +128,15 @@ module "log_archive" {
   enforce_encryption_policy  = true
   replication_regions        = ["ap-south-1", "eu-central-1"]
 }
+```
+
+The lifecycle day counts are object ages, not time spent in the previous tier. Standard-IA starts at day 30 or later. Deep Archive starts at least 30 days after Standard-IA, and expiration is either disabled (`0`) or later than the archive transition. These constraints fail during planning. Early deletion can still incur minimum storage charges. See the [AWS lifecycle constraints](https://docs.aws.amazon.com/AmazonS3/latest/userguide/lifecycle-transition-general-considerations.html).
+
+Run the plan regression tests without AWS credentials or resources (Terraform 1.7 or later):
+
+```bash
+terraform -chdir=AWS/modules/s3_lifecycle init -backend=false
+terraform -chdir=AWS/modules/s3_lifecycle test
 ```
 
 Same module, same behavior, ported to Pulumi (TypeScript): [`Pulumi/aws-s3-lifecycle`](Pulumi/aws-s3-lifecycle/). Written for a direct side-by-side comparison of the two IaC models on one real module rather than a comparison writeup with no code behind it.

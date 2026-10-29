@@ -1,7 +1,8 @@
-# Cost tagging enforcement module
-# Attaches a mandatory tagging policy to an AWS account or OU to ensure
-# all resources are tagged with cost-center, environment, team, and service.
-# Required before any cost allocation or chargeback reporting is accurate.
+# Cost tag consistency and reporting module.
+# Defines tag-key case compliance on configured resource types, activates
+# cost allocation tags, and creates team budgets. This policy does not add
+# missing tags or prevent every untagged resource from being created.
+# See README.md for the enforcement boundary.
 #
 # Usage: Apply at the AWS Organizations root or per-OU for multi-team enforcement.
 # This pattern is a standard approach for reducing unattributed spend in large,
@@ -11,7 +12,7 @@ resource "aws_organizations_policy" "cost_tagging" {
   count = var.enable_org_policy ? 1 : 0
 
   name        = "${var.policy_name_prefix}-cost-tagging"
-  description = "Require cost-center, environment, team, and service tags on all supported resources"
+  description = "Standardize configured tag-key case on supported tagged resources"
   type        = "TAG_POLICY"
 
   content = jsonencode({

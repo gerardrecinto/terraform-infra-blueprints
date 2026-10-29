@@ -1,0 +1,51 @@
+name: Lifecycle and catalog QA
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle-plans:
+    name: S3 lifecycle plans without AWS credentials
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: '1.9.8'
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive AWS/modules/s3_lifecycle
+      - name: Run the documented initialization and validation
+        run: |
+          terraform -chdir=AWS/modules/s3_lifecycle init -backend=false -input=false
+          terraform -chdir=AWS/modules/s3_lifecycle validate
+      - name: Reject invalid schedules in mocked plans
+        run: terraform -chdir=AWS/modules/s3_lifecycle test -no-color
+
+  catalog:
+    name: Catalog in three engines at mobile and desktop widths
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install exact test dependencies
+        working-directory: site
+        run: npm ci
+      - name: Install three browser engines
+        working-directory: site
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Test the assembled catalog, keyboard, contrast and fallback paths
+        working-directory: site
+        run: npm test

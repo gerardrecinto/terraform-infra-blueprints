@@ -36,3 +36,8 @@ override.tf.json
 __pycache__/
 .pytest_cache/
 *.pyc
+
+site/node_modules/
+site/dist/
+site/test-results/
+site/playwright-report/
