@@ -6,6 +6,7 @@
 # The private key password comes from COSIGN_PASSWORD.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib.sh
 . "$here/lib.sh"
 need crane; need cosign; need jq
 

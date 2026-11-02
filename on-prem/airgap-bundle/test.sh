@@ -4,6 +4,7 @@
 # the bundle four ways and checks that verify and import both refuse each time.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib.sh
 . "$here/lib.sh"
 need docker; need crane; need cosign; need helm; need jq
 

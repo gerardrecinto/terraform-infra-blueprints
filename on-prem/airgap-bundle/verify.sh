@@ -5,6 +5,7 @@
 # (index digest matches the manifest, every blob file hashes to its own name).
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib.sh
 . "$here/lib.sh"
 need cosign; need jq
 

@@ -45,7 +45,7 @@ PASS: STRICT mTLS refuses plaintext, AuthorizationPolicy allows one principal on
 
 ## A thing I hit
 
-My first version waited for one 403 and then checked again. It failed in about 3 of 10 runs. While the policy reaches the sidecars the responses flap, as the "responses while the policy propagated" line shows (403, then 200, then 403 again). The script now waits for three 403s in a row before it asserts. If you test policy changes in a pipeline, do the same.
+My first version waited for one 403 and then checked again. It failed in about 3 of 10 runs. While the policy reaches the sidecars the responses flap, as the "responses while the policy propagated" line shows (403, then 200, then 403 again). The script now waits for three 403s in a row before it asserts, and it passed 6 runs in a row after that change. If you test policy changes in a pipeline, do the same.
 
 ## Not covered
 

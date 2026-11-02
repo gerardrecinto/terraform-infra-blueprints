@@ -4,6 +4,7 @@
 # Refuses to import anything unless verify.sh passes first.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib.sh
 . "$here/lib.sh"
 need crane; need jq
 

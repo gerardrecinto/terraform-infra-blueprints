@@ -70,7 +70,7 @@ jobs:
       - name: Fail on a literal AWS partition in module code
         run: |
           if grep -rn --include='*.tf' 'arn:aws:' AWS/modules/partition_aware_artifact_store/*.tf AWS/modules/ecs_fargate_service/*.tf; then
-            echo 'Use arn:${local.partition}: so the module also plans in aws-us-gov'
+            echo "Build ARNs from the partition data source so the module also plans in aws-us-gov"
             exit 1
           fi
           echo 'No hardcoded partition found'
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Shellcheck the bundle scripts
-        run: shellcheck -x on-prem/airgap-bundle/*.sh on-prem/istio-mtls-lab/run.sh
+        run: shellcheck -x -P SCRIPTDIR on-prem/airgap-bundle/*.sh on-prem/istio-mtls-lab/run.sh
       - name: Install crane and cosign
         run: |
           go install github.com/google/go-containerregistry/cmd/crane@v0.20.2
