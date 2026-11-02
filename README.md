@@ -54,7 +54,9 @@ AWS/
 │   ├── sqs_sns/           SQS + SNS with DLQ, FIFO, cross-service subscriptions
 │   ├── opensearch/        OpenSearch with Cognito/SAML SSO + Azure AD OIDC
 │   ├── waf_ddos/          WAFv2 web ACL: IP block lists, per-IP rate limit, managed rules, redacted logs, optional Shield Advanced
-│   └── dr_failover/       Route 53 weighted records with health checks for draining and switching traffic between sites
+│   ├── dr_failover/       Route 53 weighted records with health checks for draining and switching traffic between sites
+│   ├── partition_aware_artifact_store/  S3 bucket plus read role whose ARNs follow the provider partition (aws, aws-us-gov); lab
+│   └── ecs_fargate_service/  Fargate service with rollback-on-failure deploys, private tasks, CPU autoscaling, partition-aware role ARNs; lab
 └── workflows/
     ├── deploy_eks/        EKS cluster provisioning (EKS Auto Mode, Helm/K8s providers)
     ├── blue_green_eks/    zero-downtime EB → EKS via ALB weighted target groups
@@ -96,6 +98,10 @@ helm/
 
 ansible/
 └── playbooks/k8s-rolling-node-upgrade.yml   cordon, drain, upgrade, verify and uncordon kubeadm workers one at a time
+
+on-prem/
+├── airgap-bundle/         export, sign, verify and import images and charts for a disconnected site; tamper tests (lab)
+└── istio-mtls-lab/        kind + Istio: STRICT mTLS and a one-principal AuthorizationPolicy, checked with real requests (lab)
 
 live/
 ├── root.hcl                                shared locals: cloud/environment derived from the folder path
@@ -414,6 +420,37 @@ helm upgrade --install web helm/charts/web-service -n web --create-namespace \
 Commercial angle and consulting hooks: [docs/go-to-market.md](docs/go-to-market.md).
 
 </details>
+
+## Lab additions: GovCloud partitions, ECS, air-gap delivery, Istio
+
+These four additions are lab and reference work. They were validated on one laptop and in CI where noted. Nothing here has been applied to a real AWS or GovCloud account.
+
+**Partition-aware AWS modules** (`AWS/modules/partition_aware_artifact_store`, `AWS/modules/ecs_fargate_service`). ARNs are built from `data.aws_partition`, so the same code plans in `aws` and `aws-us-gov`, and the S3 hostname is built from region, partition DNS suffix and a FIPS switch. GovCloud was checked with mocked plans that override the partition to `aws-us-gov` and the region to `us-gov-west-1`. I have no GovCloud account, so there was no real plan or apply against GovCloud. The FIPS endpoint hostname is built by rule and not tested against a live endpoint. A CI job fails if a literal `arn:aws:` appears in either module.
+
+```text
+$ cd AWS/modules/partition_aware_artifact_store && terraform test
+  run "commercial_partition"... pass
+  run "govcloud_partition"... pass
+  run "govcloud_fips_endpoint"... pass
+  run "kms_key_from_other_partition_is_rejected_when_malformed"... pass
+  run "bad_bucket_name"... pass
+Success! 5 passed, 0 failed.
+
+$ cd AWS/modules/ecs_fargate_service && terraform test
+  run "commercial_defaults"... pass
+  run "govcloud_partition"... pass
+  run "invalid_cpu_memory_pair"... pass
+  run "open_ingress_rejected"... pass
+  run "single_subnet_rejected"... pass
+  run "min_above_max_rejected"... pass
+Success! 6 passed, 0 failed.
+```
+
+Terraform 1.9.8, `terraform validate` clean, `terraform fmt -check` clean, Trivy config scan at HIGH and CRITICAL reported 0 misconfigurations for both modules. The ECS module uses Fargate with a deployment circuit breaker that rolls back, no public IPs, an empty task role, a read-only root filesystem, CPU target-tracking autoscaling, and an input check for valid CPU and memory pairs. I have not deployed it, so image pulls, networking and autoscaling behavior are untested.
+
+**Air-gap bundle** (`on-prem/airgap-bundle`). Export images and charts, sign a manifest, verify offline, import into an internal registry, refuse on tampering. See its README for the real run: 6 checks passed against a local `registry:2`, including a flipped byte in a layer, an edited manifest, a modified chart and the wrong key.
+
+**Istio mTLS** (`on-prem/istio-mtls-lab`). Istio 1.30.7 on a kind cluster. STRICT mTLS refused a plaintext client, and an AuthorizationPolicy let one service account through while another got 403. See its README, including a flaky check I hit and fixed.
 
 ## License
 

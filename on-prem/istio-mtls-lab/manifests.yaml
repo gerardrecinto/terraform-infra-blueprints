@@ -1,0 +1,118 @@
+# Namespaces: "mesh" has sidecar injection, "plain" does not.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plain
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: server
+  namespace: mesh
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: allowed-client
+  namespace: mesh
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: other-client
+  namespace: mesh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: server}
+  template:
+    metadata:
+      labels: {app: server}
+    spec:
+      serviceAccountName: server
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  namespace: mesh
+spec:
+  selector: {app: server}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allowed-client
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: allowed-client}
+  template:
+    metadata:
+      labels: {app: allowed-client}
+    spec:
+      serviceAccountName: allowed-client
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: other-client
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: other-client}
+  template:
+    metadata:
+      labels: {app: other-client}
+    spec:
+      serviceAccountName: other-client
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plain-client
+  namespace: plain
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: plain-client}
+  template:
+    metadata:
+      labels: {app: plain-client}
+    spec:
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]

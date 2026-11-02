@@ -31,6 +31,12 @@ jobs:
           - path: secure-connectivity/modules/nginx-public-service
             mocked_tests: true
             scan: false
+          - path: AWS/modules/partition_aware_artifact_store
+            mocked_tests: true
+            scan: true
+          - path: AWS/modules/ecs_fargate_service
+            mocked_tests: true
+            scan: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4
@@ -54,3 +60,33 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: '1'
           format: table
+
+  partition-arns:
+    name: No hardcoded AWS partition in the partition-aware modules
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Fail on literal arn:aws: in module code
+        run: |
+          if grep -rn --include='*.tf' 'arn:aws:' AWS/modules/partition_aware_artifact_store/*.tf AWS/modules/ecs_fargate_service/*.tf; then
+            echo 'Use arn:${local.partition}: so the module also plans in aws-us-gov'
+            exit 1
+          fi
+          echo 'No hardcoded partition found'
+
+  airgap-bundle:
+    name: Air-gap bundle export, verify, import and tamper checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Shellcheck the bundle scripts
+        run: shellcheck -x on-prem/airgap-bundle/*.sh on-prem/istio-mtls-lab/run.sh
+      - name: Install crane and cosign
+        run: |
+          go install github.com/google/go-containerregistry/cmd/crane@v0.20.2
+          CGO_ENABLED=0 go install github.com/sigstore/cosign/v2/cmd/cosign@v2.4.1
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Run the end-to-end proof
+        run: on-prem/airgap-bundle/test.sh

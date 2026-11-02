@@ -1,0 +1,9 @@
+# Step 1: require mTLS for everything in the mesh namespace.
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: mesh
+spec:
+  mtls:
+    mode: STRICT
