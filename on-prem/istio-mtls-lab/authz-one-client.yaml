@@ -1,0 +1,15 @@
+# Step 2: only one service account may call the server.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: server-allow-one-client
+  namespace: mesh
+spec:
+  selector:
+    matchLabels:
+      app: server
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ["cluster.local/ns/mesh/sa/allowed-client"]

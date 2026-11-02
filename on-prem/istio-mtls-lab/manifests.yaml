@@ -1,0 +1,180 @@
+# Namespaces: "mesh" has sidecar injection, "plain" does not.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plain
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: server
+  namespace: mesh
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: allowed-client
+  namespace: mesh
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: other-client
+  namespace: mesh
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: server}
+  template:
+    metadata:
+      labels: {app: server}
+    spec:
+      serviceAccountName: server
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.27-alpine
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  namespace: mesh
+spec:
+  selector: {app: server}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allowed-client
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: allowed-client}
+  template:
+    metadata:
+      labels: {app: allowed-client}
+    spec:
+      serviceAccountName: allowed-client
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: other-client
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: other-client}
+  template:
+    metadata:
+      labels: {app: other-client}
+    spec:
+      serviceAccountName: other-client
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plain-client
+  namespace: plain
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: plain-client}
+  template:
+    metadata:
+      labels: {app: plain-client}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          command: ["sleep", "86400"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 128Mi}
