@@ -67,7 +67,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Fail on literal arn:aws: in module code
+      - name: Fail on a literal AWS partition in module code
         run: |
           if grep -rn --include='*.tf' 'arn:aws:' AWS/modules/partition_aware_artifact_store/*.tf AWS/modules/ecs_fargate_service/*.tf; then
             echo 'Use arn:${local.partition}: so the module also plans in aws-us-gov'
