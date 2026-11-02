@@ -20,7 +20,7 @@ KEEP=1 ./run.sh     # leave the cluster up to poke at it
 ## Files
 
 - `kind.yaml` single-node cluster.
-- `manifests.yaml` namespaces `mesh` (sidecar injection on) and `plain` (off), an nginx server, two curl clients in `mesh` with different service accounts, one curl client in `plain`.
+- `manifests.yaml` namespaces `mesh` (sidecar injection on) and `plain` (off), an unprivileged nginx server on 8080, two curl clients in `mesh` with different service accounts, one curl client in `plain`. Pods run non-root with a read-only root filesystem, dropped capabilities, a RuntimeDefault seccomp profile and resource limits. A Trivy config scan reports no HIGH or CRITICAL findings; it still flags the Docker Hub images as an untrusted registry (medium).
 - `peer-auth-strict.yaml` mTLS STRICT for the `mesh` namespace.
 - `authz-one-client.yaml` ALLOW only `cluster.local/ns/mesh/sa/allowed-client` on the server.
 
