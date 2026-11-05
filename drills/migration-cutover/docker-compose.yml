@@ -1,0 +1,25 @@
+# A legacy stack and a "cloud" stack side by side, each with its own Postgres, behind a proxy
+# whose server weights stand in for weighted DNS. Local only: no cloud account.
+services:
+  legacy-db:
+    image: postgres:16-alpine
+    container_name: mig-legacy-db
+    environment: { POSTGRES_PASSWORD: local-only, POSTGRES_DB: shop }
+  cloud-db:
+    image: postgres:16-alpine
+    container_name: mig-cloud-db
+    environment: { POSTGRES_PASSWORD: local-only, POSTGRES_DB: shop }
+  legacy-app:
+    image: nginx:1.27-alpine
+    container_name: mig-legacy-app
+    volumes: ["./legacy-app.conf:/etc/nginx/conf.d/default.conf:ro"]
+  cloud-app:
+    image: nginx:1.27-alpine
+    container_name: mig-cloud-app
+    volumes: ["./cloud-app.conf:/etc/nginx/conf.d/default.conf:ro"]
+  proxy:
+    image: haproxy:3.0-alpine
+    container_name: mig-proxy
+    ports: ["127.0.0.1:18090:8080"]
+    volumes: ["./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"]
+    depends_on: [legacy-app, cloud-app]

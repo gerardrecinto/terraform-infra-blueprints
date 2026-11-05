@@ -1,6 +1,6 @@
 # On-premises to cloud migration plan (design only)
 
-Status: design. No migration was run from this plan. The pieces it uses that do exist in this repo: `AWS/modules/dr_failover` (weighted DNS with health checks), `Akamai/modules/gtm_failover` (global traffic switch), `drills/pull-the-plug` (a measured switch), `AWS/modules/eks` and `ansible/` (the target cluster and its upgrades).
+Status: design. No migration was run from this plan. The pieces it uses that do exist in this repo: `AWS/modules/dr_failover` (weighted DNS with health checks), `Akamai/modules/gtm_failover` (global traffic switch), `drills/pull-the-plug` (a measured switch), `drills/migration-cutover` (a runnable rehearsal of the cutover steps below on one machine), `AWS/modules/eks` and `ansible/` (the target cluster and its upgrades).
 
 ## Waves
 
