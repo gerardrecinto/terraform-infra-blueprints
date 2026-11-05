@@ -14,6 +14,18 @@
 | **PCI DSS 10.x** Log and monitor access | Logs retained and protected | WAF log group with retention, optional KMS key, header redaction | Retention configuration, access policy on logs |
 | **SOX ITGC** Change management and segregation of duties | Changes traceable to an approved request; developers cannot push straight to production | Infrastructure as code with PR review; `plan` output kept as the change record | Branch protection settings, approvals, apply logs |
 
+## Collect repository evidence
+
+`scripts/compliance_evidence.py` reads a repository's change-management and security settings with the GitHub CLI and prints one table per repository: branch protection, required checks and reviews, CODEOWNERS, force-push rules, admin exemption, secret scanning, dependency alerts, a CodeQL workflow, SECURITY.md and the last CI result. Each row names the control area it supports.
+
+```bash
+python3 scripts/compliance_evidence.py owner/repo [owner/repo ...]   # tables
+python3 scripts/compliance_evidence.py owner/repo --json             # for a ticket or an evidence folder
+python3 scripts/compliance_evidence.py owner/repo --strict           # exit 1 if any check is not met
+```
+
+It needs Python 3.9 or later and `gh` signed in. It only reads. A "met" row means a setting is on, not that the control works, and a call it could not make is shown as "unknown" instead of guessed. The control mapping is my reading, not an auditor's. It is not an audit.
+
 ## Limits
 
 - Controls here cover infrastructure patterns only; application, people and process controls are separate.
