@@ -43,6 +43,9 @@ jobs:
             (cd "$mod" && terraform init -backend=false -input=false -no-color && terraform test -no-color)
           done
 
+      - name: Compliance evidence script tests
+        run: python3 -m unittest discover -s tests/evidence -v
+
       - name: Check for hardcoded secrets
         run: |
           if grep -rn --include='*.tf' -E '(aws_access_key_id|aws_secret_access_key|password\s*=\s*"[^"]{8,}")' .; then
