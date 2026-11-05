@@ -28,12 +28,19 @@ jobs:
 
       - name: Validate modules
         run: |
-          for mod in AWS/modules/*/ Azure/modules/*/ GCP/modules/*/ AliCloud/modules/*/ OpenStack/modules/*/ on-prem/modules/*/ secure-connectivity/modules/*/; do
+          for mod in AWS/modules/*/ Azure/modules/*/ GCP/modules/*/ AliCloud/modules/*/ OpenStack/modules/*/ on-prem/modules/*/ secure-connectivity/modules/*/ Akamai/modules/*/ Dynatrace/modules/*/; do
             echo "Validating $mod..."
             cd "$mod"
             terraform init -backend=false -input=false -no-color
             terraform validate -no-color
             cd - > /dev/null
+          done
+
+      - name: Run module plan tests (no credentials, mocked providers)
+        run: |
+          for mod in Akamai/modules/gtm_failover Dynatrace/modules/slo_alerting; do
+            echo "Testing $mod..."
+            (cd "$mod" && terraform init -backend=false -input=false -no-color && terraform test -no-color)
           done
 
       - name: Check for hardcoded secrets
