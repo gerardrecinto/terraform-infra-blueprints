@@ -107,7 +107,8 @@ Dynatrace/
 
 drills/
 ├── pull-the-plug/         Docker: two sites behind a health-checking proxy, plug pulled, failover and failback measured (lab)
-└── apache-upgrade/        Docker: Apache httpd 2.4.58 to latest behind a config-test and parity gate (lab)
+├── apache-upgrade/        Docker: Apache httpd 2.4.58 to latest behind a config-test and parity gate (lab)
+└── migration-cutover/     Docker: copy a database with a checksum, shift traffic in steps, roll back a bad release, cut over (lab)
 
 on-prem/
 ├── airgap-bundle/         export, sign, verify and import images and charts for a disconnected site; tamper tests (lab)
@@ -417,7 +418,7 @@ helm upgrade --install web helm/charts/web-service -n web --create-namespace \
 - [docs/compliance-controls-map.md](docs/compliance-controls-map.md): where SOC 2, PCI DSS and SOX control areas line up with these modules (supports evidence gathering; not a compliance claim).
 - [docs/threat-model-web-service.md](docs/threat-model-web-service.md): STRIDE walk-through for the reference stack.
 - [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md): planned site drain and rehearsal.
-- [drills/README.md](drills/README.md): the two runnable Docker drills.
+- [drills/README.md](drills/README.md): the three runnable Docker drills.
 - [docs/on-prem-to-cloud-migration-plan.md](docs/on-prem-to-cloud-migration-plan.md): wave and cutover plan (design only).
 
 </details>
