@@ -99,6 +99,16 @@ helm/
 ansible/
 └── playbooks/k8s-rolling-node-upgrade.yml   cordon, drain, upgrade, verify and uncordon kubeadm workers one at a time
 
+Akamai/
+└── modules/gtm_failover/  Global Traffic Management: failover or weighted traffic between sites with a liveness test; validated and plan-tested with a mocked provider, never applied
+
+Dynatrace/
+└── modules/slo_alerting/  availability SLO with error budget burn rate plus an alerting profile; validated and plan-tested with a mocked provider, never applied
+
+drills/
+├── pull-the-plug/         Docker: two sites behind a health-checking proxy, plug pulled, failover and failback measured (lab)
+└── apache-upgrade/        Docker: Apache httpd 2.4.58 to latest behind a config-test and parity gate (lab)
+
 on-prem/
 ├── airgap-bundle/         export, sign, verify and import images and charts for a disconnected site; tamper tests (lab)
 └── istio-mtls-lab/        kind + Istio: STRICT mTLS and a one-principal AuthorizationPolicy, checked with real requests (lab)
@@ -407,6 +417,8 @@ helm upgrade --install web helm/charts/web-service -n web --create-namespace \
 - [docs/compliance-controls-map.md](docs/compliance-controls-map.md): where SOC 2, PCI DSS and SOX control areas line up with these modules (supports evidence gathering; not a compliance claim).
 - [docs/threat-model-web-service.md](docs/threat-model-web-service.md): STRIDE walk-through for the reference stack.
 - [docs/pull-the-plug-runbook.md](docs/pull-the-plug-runbook.md): planned site drain and rehearsal.
+- [drills/README.md](drills/README.md): the two runnable Docker drills.
+- [docs/on-prem-to-cloud-migration-plan.md](docs/on-prem-to-cloud-migration-plan.md): wave and cutover plan (design only).
 
 </details>
 

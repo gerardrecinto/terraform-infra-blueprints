@@ -1,0 +1,24 @@
+# Two "data centers" (nginx) behind a health-checking proxy that stands in for a global traffic
+# manager. dc-east is primary and dc-west is the backup, which is the failover shape of the
+# Akamai/gtm_failover module. Local only: no cloud account, no Akamai tenant.
+services:
+  dc-east:
+    image: nginx:1.27-alpine
+    container_name: ptp-dc-east
+    volumes:
+      - ./dc-east.conf:/etc/nginx/conf.d/default.conf:ro
+  dc-west:
+    image: nginx:1.27-alpine
+    container_name: ptp-dc-west
+    volumes:
+      - ./dc-west.conf:/etc/nginx/conf.d/default.conf:ro
+  traffic-manager:
+    image: haproxy:3.0-alpine
+    container_name: ptp-traffic-manager
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - dc-east
+      - dc-west
