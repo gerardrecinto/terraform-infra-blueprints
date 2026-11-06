@@ -4,7 +4,7 @@
 # private-compute-access and access-gateway modules are designed around
 # Session Manager and VPC interface endpoints, not outbound internet access.
 # A demo that only needs SSM connectivity doesn't need to pay for a NAT
-# Gateway at all -- see docs/interview-guide.md for the cost tradeoff.
+# Gateway at all -- the NAT cost tradeoff is a known cost of private subnets.
 
 locals {
   tags = merge(var.tags, {

@@ -8,7 +8,7 @@ This repo is a platform infrastructure portfolio: reusable Terraform modules, cl
 
 | Offer | Buyer |
 |---|---|
-| Public module examples | Platform engineers and hiring teams. |
+| Public module examples | Platform engineers and teams comparing Terraform patterns. |
 | Terraform modernization consulting | Teams with unmanaged cloud infrastructure. |
 | Cost optimization package | Teams with S3/logging/storage waste. |
 | Cloud landing-zone implementation | Teams starting AWS/Azure/GCP platform programs. |

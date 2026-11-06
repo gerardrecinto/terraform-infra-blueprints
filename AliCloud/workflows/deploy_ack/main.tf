@@ -1,4 +1,3 @@
-# NOTE: Published as supporting evidence for skills on resume.
 # All company-specific values (account IDs, hostnames, ARNs, CIDRs, resource names)
 # have been replaced with generic placeholders. This is an original portfolio
 # implementation demonstrating the ACK + OSS + API Gateway composition pattern generically.

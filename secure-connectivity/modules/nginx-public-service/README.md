@@ -14,9 +14,8 @@ Internet
 
 This is an HTTP web service, not a raw TCP/long-lived-connection workload, so
 Layer 7 routing, HTTP health checks, and TLS termination at the load balancer
-are the right fit. See `secure-connectivity/docs/interview-guide.md` for the
-full NLB-vs-ALB comparison used across this portfolio (the `device-connectivity`
-environment makes the opposite call, for a reason).
+are the right fit. The `device-connectivity` environment makes the opposite
+call (NLB), because it carries long-lived device connections.
 
 ## Security decisions
 

@@ -386,7 +386,7 @@ Four AWS connectivity modules: a public NGINX service, private SSM-only
 compute access, an optional hardened access gateway, and a shared network
 module. They show public-vs-private trust boundaries, identity-aware
 administrative access and module composition. The two environment
-capstones and the interview guide that the build plan mentions are not in
+capstones that the build plan mentions are not in
 the repo yet; see [secure-connectivity/PROGRESS.md](secure-connectivity/PROGRESS.md)
 for build status.
 

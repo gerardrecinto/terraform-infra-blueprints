@@ -1,4 +1,3 @@
-# NOTE: Published as supporting evidence for skills on resume.
 # All company-specific values (account IDs, hostnames, ARNs, CIDRs, resource names)
 # have been replaced with generic placeholders to preserve company CCI.
 # API Gateway module -- analogous to the GCP apigee module
