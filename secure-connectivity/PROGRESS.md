@@ -1,30 +1,27 @@
 # secure-connectivity build progress
 
 Tracking doc for the 5-project portfolio build requested on top of the existing
-`terraform-infra-blueprints` repo. Update this as work lands so it can be handed
-to another agent (e.g. Antigravity) mid-build if needed.
+`terraform-infra-blueprints` repo. Update this as work lands.
 
 ## Scope decision (read this first)
 
 The original spec asked for ~8 markdown docs per project (architecture, security,
-threat-model, interview-guide, migration-guide, disaster-recovery, cost-considerations,
+threat-model, design-guide, migration-guide, disaster-recovery, cost-considerations,
 troubleshooting) x 5 projects = 40 doc files, most of which would repeat the same
-content with minor variation. That's fluff, not signal, and it works against
-real interview prep. Scope reduction applied:
+content with minor variation. That is repetition, not signal. Scope reduction applied:
 
 - Real, validated, working Terraform (modules + one example per module/environment) —
   this is the actual portfolio substance.
 - One README per module/environment (architecture + security + decisions inline,
   not split across files).
-- One shared `docs/interview-guide.md` and one shared `docs/threat-model.md` at
+- One shared `docs/design-guide.md` and one shared `docs/threat-model.md` at
   the `secure-connectivity/` root covering all 5 pieces together, since the
   interesting content (why SSM over SSH, NLB vs ALB, trust boundaries) is shared
   across them and is more useful consolidated than duplicated 5 ways.
 - CI: one `.github/workflows/secure-connectivity.yml` covering fmt/init/validate
   for all modules+environments under this directory, reusing the repo's existing
   CI patterns.
-- No LinkedIn blurbs / portfolio-card copy / GitHub topics lists — resume bullets
-  only, since those are the only assets with real interview value.
+- No marketing copy or topic lists. The Terraform and the module READMEs are the deliverable.
 
 ## Layout
 
@@ -39,7 +36,7 @@ secure-connectivity/
 │   ├── web-platform/            Project 4: composes network+nginx+private-access
 │   └── device-connectivity/     Project 5: NLB/ALB decision, edge+backend+admin paths
 └── docs/
-    ├── interview-guide.md
+    ├── design-guide.md
     └── threat-model.md
 ```
 
@@ -54,12 +51,11 @@ secure-connectivity/
 | modules/access-gateway | CODE DONE, NOT VALIDATED, NO README YET | never got to init/validate this one; do that first when picking this up |
 | environments/web-platform | NOT STARTED | Project 4 capstone -- composes network + nginx-public-service + private-compute-access |
 | environments/device-connectivity | NOT STARTED | Project 5 capstone -- NLB vs ALB decision, edge + backend + admin paths |
-| docs/interview-guide.md | NOT STARTED | |
+| docs/design-guide.md | NOT STARTED | |
 | docs/threat-model.md | NOT STARTED | |
 | CI workflow | NOT STARTED | |
 | terraform fmt pass | DONE for all 4 modules built so far | |
 | terraform validate pass | PARTIAL — network module confirmed clean; nginx-public-service/private-compute-access/access-gateway not yet confirmed (see above) | trivy available locally; tflint/checkov/terraform-docs NOT installed — note as limitation, don't claim they ran |
-| Resume bullets | NOT STARTED | |
 | Push to main | IN PROGRESS, pushing incrementally | user has authorized direct push to main, no PR review needed; a full git-history rewrite (git filter-repo) was already done once on this repo to scrub pre-existing sensitive names/metrics -- see git log, that's expected and done, don't repeat it |
 
 ## If picking this up cold
