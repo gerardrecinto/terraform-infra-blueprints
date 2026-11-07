@@ -2,7 +2,7 @@
 # have been replaced with generic placeholders to preserve company CCI.
 # Grafana alerting module
 # Monitors 10 ALBs and 4 AWS services: MSK, SQS, SNS, PrivateLink
-# Deployed across dev / test / stage / demo / prod environments
+# Written to be reused across dev / test / stage / demo / prod environments; not applied to a real Grafana instance
 # Alerts route to Slack and PagerDuty via contact points
 
 terraform {

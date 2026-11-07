@@ -6,10 +6,10 @@ rules (log tiering to Standard-IA then Glacier Deep Archive, noncurrent
 version expiration), same public-access block, same HTTPS/KMS-enforcing
 bucket policy, same optional cross-region replication.
 
-This exists to close a specific gap: Terraform is the tool actually run
-in production, this module is the "I understand Pulumi's model, not
-just Terraform's" proof, done as real working code instead of a
-comparison table.
+This exists as a side-by-side comparison of the two IaC models on one
+module, written as code instead of a comparison table. It type-checks
+against the real `@pulumi/aws` SDK. It has not been previewed or applied
+against an AWS account, so treat it as untested beyond the type check.
 
 ## What's actually different from the Terraform version, and why
 

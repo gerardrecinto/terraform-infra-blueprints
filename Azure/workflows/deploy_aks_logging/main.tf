@@ -2,7 +2,7 @@
 # have been replaced with generic placeholders to preserve company CCI.
 # IoT telemetry logging pipeline on Azure AKS
 # Full stack: FluentBit -> Kafka (MSK equivalent via Event Hubs) -> Logstash -> OpenSearch -> Grafana
-# Deployed via Terraform + Helm for ExampleCorp IoT telemetry platform
+# Example workflow built with Terraform + Helm for an IoT telemetry platform; not applied to a real subscription
 
 terraform {
   required_providers {
