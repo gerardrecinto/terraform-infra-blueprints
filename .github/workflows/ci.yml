@@ -149,3 +149,22 @@ jobs:
       - name: Lint (production profile)
         working-directory: ansible
         run: ansible-lint playbooks
+
+  pulumi-typecheck:
+    name: Type-check the Pulumi port
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: Pulumi/aws-s3-lifecycle
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Type-check against the real @pulumi/aws SDK
+        run: npx tsc --noEmit -p .
