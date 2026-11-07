@@ -1,0 +1,21 @@
+# Known HIGH and CRITICAL Trivy findings that are intentional. Each entry names
+# the file so a new finding of the same kind elsewhere still fails the build.
+misconfigurations:
+  - id: AWS-0104
+    paths:
+      - AWS/modules/opensearch/main.tf
+      - AWS/modules/privatelink/main.tf
+      - secure-connectivity/modules/access-gateway/main.tf
+    statement: Unrestricted egress. The module does not know the destinations. Narrow it in the calling stack.
+  - id: AWS-0053
+    paths:
+      - secure-connectivity/modules/nginx-public-service/main.tf
+    statement: This module is the public internet-facing load balancer by design.
+  - id: AWS-0054
+    paths:
+      - secure-connectivity/modules/nginx-public-service/main.tf
+    statement: The listener accepts HTTP so it can redirect to HTTPS. Review before use.
+  - id: AWS-0164
+    paths:
+      - secure-connectivity/modules/network/main.tf
+    statement: Public subnets assign public IPs on launch. The private subnets do not.

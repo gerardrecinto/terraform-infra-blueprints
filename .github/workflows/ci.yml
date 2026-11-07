@@ -63,6 +63,17 @@ jobs:
           format: sarif
           output: trivy-results.sarif
 
+      - name: Block new HIGH and CRITICAL misconfigurations
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          trivy-config: trivy.yaml
+          trivyignores: .trivyignore.yaml
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: table
+
       - name: Upload Trivy results to Code Scanning
         uses: github/codeql-action/upload-sarif@v4
         if: always()
