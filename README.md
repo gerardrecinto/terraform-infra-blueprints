@@ -111,6 +111,7 @@ drills/
 └── migration-cutover/     Docker: copy a database with a checksum, shift traffic in steps, roll back a bad release, cut over (lab)
 
 on-prem/
+├── modules/ai_observability_cost/  per-tenant namespaces and GPU/CPU quotas, OpenCost, an OpenTelemetry Collector that stamps tenant.id and writes to Kafka, DCGM GPU telemetry (lab)
 ├── airgap-bundle/         export, sign, verify and import images and charts for a disconnected site; tamper tests (lab)
 └── istio-mtls-lab/        kind + Istio: STRICT mTLS and a one-principal AuthorizationPolicy, checked with real requests (lab)
 
@@ -123,6 +124,20 @@ live/
 ├── aws/{dev,prod}/opensearch_migration/    dev + prod units for AWS/workflows/opensearch_migration
 └── azure/{dev,prod}/aks_logging/           dev + prod units for Azure/workflows/deploy_aks_logging
 ```
+
+</details>
+
+<details>
+<summary><b>AI observability and cost (on-prem/modules/ai_observability_cost)</b></summary>
+
+For a cluster that serves models. Each tenant gets a namespace labelled `tenant=<key>` and a ResourceQuota that bounds GPU, CPU, memory and pods. OpenCost reads Prometheus or Mimir and reports cost by that label. An OpenTelemetry Collector receives OTLP, scrapes the NVIDIA DCGM exporter, stamps `tenant.id` from the pod label (`unattributed` if missing), drops the spans and metrics you list, batches, and writes traces, metrics and logs to Kafka through a retrying queue.
+
+```bash
+cd on-prem/modules/ai_observability_cost
+terraform init -backend=false && terraform test
+```
+
+What was checked: `terraform validate`, 8 plan tests with mocked providers, `helm template` of all three charts, and the rendered collector config through `otelcol-contrib validate` (0.163.2). What was not: an apply against a real cluster, real GPUs, or a Kafka broker. The tenant label is only as trustworthy as who can edit pod labels, and a quota bounds what a tenant can request, not how many inference calls it makes. See the header of `main.tf` for the trade-offs.
 
 </details>
 

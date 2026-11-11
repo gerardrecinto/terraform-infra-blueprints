@@ -38,7 +38,7 @@ jobs:
 
       - name: Run module plan tests (no credentials, mocked providers)
         run: |
-          for mod in Akamai/modules/gtm_failover Dynatrace/modules/slo_alerting; do
+          for mod in Akamai/modules/gtm_failover Dynatrace/modules/slo_alerting on-prem/modules/ai_observability_cost; do
             echo "Testing $mod..."
             (cd "$mod" && terraform init -backend=false -input=false -no-color && terraform test -no-color)
           done
