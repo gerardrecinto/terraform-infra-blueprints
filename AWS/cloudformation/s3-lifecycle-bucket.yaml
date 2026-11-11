@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Private, encrypted, versioned S3 bucket that moves objects to Glacier Deep Archive
+  after a set number of days. Same intent as the s3 lifecycle Terraform module in this repo.
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Globally unique bucket name.
+    AllowedPattern: "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"
+  ArchiveAfterDays:
+    Type: Number
+    Default: 30
+    MinValue: 1
+    Description: Days before objects move to Glacier Deep Archive. Retrieval takes up to 48 hours.
+  ExpireNoncurrentAfterDays:
+    Type: Number
+    Default: 90
+    MinValue: 1
+    Description: Days before old object versions are deleted.
+
+Resources:
+  BucketKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encrypts the lifecycle bucket
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !GetAtt BucketKey.Arn
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: archive-then-expire-old-versions
+            Status: Enabled
+            Transitions:
+              - StorageClass: DEEP_ARCHIVE
+                TransitionInDays: !Ref ArchiveAfterDays
+            NoncurrentVersionExpiration:
+              NoncurrentDays: !Ref ExpireNoncurrentAfterDays
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !GetAtt Bucket.Arn
+              - !Sub "${Bucket.Arn}/*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": "false"
+
+Outputs:
+  BucketArn:
+    Value: !GetAtt Bucket.Arn
