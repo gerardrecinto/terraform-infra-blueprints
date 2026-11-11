@@ -179,3 +179,36 @@ jobs:
 
       - name: Type-check against the real @pulumi/aws SDK
         run: npx tsc --noEmit -p .
+
+  opentofu-validate:
+    name: Validate AWS and Azure modules with OpenTofu
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.13.9"
+
+      - name: Init and validate each module
+        run: |
+          for mod in AWS/modules/*/ Azure/modules/*/; do
+            echo "Validating $mod with OpenTofu..."
+            (cd "$mod" && tofu init -backend=false -input=false -no-color && tofu validate -no-color)
+          done
+
+  cloudformation-lint:
+    name: Lint CloudFormation templates
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install cfn-lint
+        run: pip install cfn-lint==1.60.0
+
+      - name: Lint
+        run: cfn-lint AWS/cloudformation/*.yaml

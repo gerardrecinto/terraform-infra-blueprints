@@ -465,6 +465,12 @@ Terraform 1.9.8, `terraform validate` clean, `terraform fmt -check` clean, Trivy
 
 **Istio mTLS** (`on-prem/istio-mtls-lab`). Istio 1.30.7 on a kind cluster. STRICT mTLS refused a plaintext client, and an AuthorizationPolicy let one service account through while another got 403. See its README, including a flaky check I hit and fixed.
 
+## OpenTofu and CloudFormation checks
+
+The AWS and Azure modules are also validated with OpenTofu 1.13.9 (`tofu init -backend=false` and `tofu validate` on all 20), in a separate CI job next to the Terraform one. Local result: all 20 pass, though `AWS/modules/eks` failed once during a bulk run on a slow download and passed on a fresh init, so I treat that as a network flake and not a module problem.
+
+`AWS/cloudformation/s3-lifecycle-bucket.yaml` is the same bucket intent as the S3 lifecycle module, written in CloudFormation: KMS customer-managed key with rotation, versioning, public access block, Glacier Deep Archive transition after a set number of days, and a TLS-only bucket policy. It passes `cfn-lint` 1.60.0 and a Trivy config scan at HIGH and CRITICAL. My first version used SSE-S3 and Trivy flagged AWS-0132, so it now uses a customer-managed key. Nothing here was deployed to an AWS account.
+
 ## License
 
 MIT
