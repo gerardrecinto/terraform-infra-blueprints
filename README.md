@@ -73,7 +73,8 @@ GCP/
 ├── modules/
 │   ├── apigee/            Apigee X org + env + instance; JS token auth; path routing; SpikeArrest
 │   ├── gke/               private cluster: Workload Identity, Binary Authorization, Shielded Nodes
-│   └── gcs_lifecycle/     Standard → Nearline → Coldline → Archive with CMEK
+│   ├── gcs_lifecycle/     Standard → Nearline → Coldline → Archive with CMEK
+│   └── cloud_dns/         private or public managed zone, DNSSEC on public zones, record sets; plan-tested with a mocked provider, never applied
 └── workflows/
     └── deploy_apigee_proxies/ three example API proxies with token auth + path routing
 
@@ -101,6 +102,9 @@ ansible/
 
 Akamai/
 └── modules/gtm_failover/  Global Traffic Management: failover or weighted traffic between sites with a liveness test; validated and plan-tested with a mocked provider, never applied
+
+Cloudflare/
+└── modules/dns_records/   DNS records with proxied and ttl rules checked at plan time; plan-tested with a mocked provider, never applied
 
 Dynatrace/
 └── modules/slo_alerting/  availability SLO with error budget burn rate plus an alerting profile; validated and plan-tested with a mocked provider, never applied
