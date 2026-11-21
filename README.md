@@ -148,6 +148,10 @@ What was checked: `terraform validate`, 8 plan tests with mocked providers, `hel
 <details>
 <summary><b>AWS Modules</b></summary>
 
+### `modules/ml_training_nodegroup`
+
+A tainted GPU node group for model training on an existing EKS cluster, plus a KMS-encrypted checkpoint bucket that expires old objects. Spot by default, scales to zero, and the plan warns on Spot with a single instance type. See [its README](AWS/modules/ml_training_nodegroup/README.md).
+
 ### `modules/s3_lifecycle`
 
 Tiered log storage: Standard → Standard-IA → Glacier Deep Archive, with KMS enforcement and optional cross-region replication. This models a common cost-optimization pattern for large, append-only log buckets where recent data needs fast access and older data can move to cold storage.
