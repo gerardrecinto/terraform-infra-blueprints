@@ -26,9 +26,9 @@ jobs:
             terraform fmt -check -diff "$dir" || { echo "Format error in $dir"; exit 1; }
           done
 
-      - name: Validate modules
+      - name: Validate modules and workflows
         run: |
-          for mod in AWS/modules/*/ Azure/modules/*/ GCP/modules/*/ AliCloud/modules/*/ OpenStack/modules/*/ on-prem/modules/*/ secure-connectivity/modules/*/ Akamai/modules/*/ Dynatrace/modules/*/ Cloudflare/modules/*/; do
+          for mod in AWS/modules/*/ Azure/modules/*/ GCP/modules/*/ AliCloud/modules/*/ OpenStack/modules/*/ on-prem/modules/*/ secure-connectivity/modules/*/ Akamai/modules/*/ Dynatrace/modules/*/ Cloudflare/modules/*/ AWS/workflows/*/ Azure/workflows/*/ GCP/workflows/*/ AliCloud/workflows/*/ OpenStack/workflows/*/ on-prem/workflows/*/; do
             echo "Validating $mod..."
             cd "$mod"
             terraform init -backend=false -input=false -no-color
