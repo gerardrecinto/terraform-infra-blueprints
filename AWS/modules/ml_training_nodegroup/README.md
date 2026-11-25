@@ -24,7 +24,8 @@ Attach `module.training.checkpoint_access_policy_json` to the IRSA role of the t
 - SPOT, scaling from 0 to 4. A GPU idle between runs costs money, and `max_size` is the cost ceiling.
 - Spot needs two or more instance types. One type fails whenever it is out of capacity, so the plan warns.
 - Spot nodes can be reclaimed, so the job must write checkpoints to the bucket and resume from the newest one. Use `ON_DEMAND` for a run that cannot restart.
-- The bucket blocks public access, uses your KMS key and deletes objects after `checkpoint_retention_days` (14). Copy a checkpoint you want to keep to a model registry first.
+- The bucket blocks public access, uses your KMS key and enables versioning to recover overwritten or deleted checkpoints. Current objects expire after `checkpoint_retention_days` (14). Previous versions expire the same number of days after becoming noncurrent, so this is not a total object-age limit. Copy a checkpoint you want to keep to a model registry first.
+- Restoring an older version needs `s3:GetObjectVersion`, which the training policy does not grant. Give that permission to a separate recovery role. S3 access logging is not configured by this module; configure it separately if your audit policy requires it.
 
 ## Check it
 
@@ -37,7 +38,7 @@ Needs Terraform 1.7 or later and no credentials.
 
 ## Roll back
 
-`terraform destroy` removes the node group and the bucket. A bucket that still holds checkpoints will not delete until it is emptied, which is deliberate.
+`terraform destroy` removes the node group and the bucket. A bucket that still holds checkpoints, previous versions or delete markers will not delete until it is emptied, which is deliberate.
 
 ## Not covered
 

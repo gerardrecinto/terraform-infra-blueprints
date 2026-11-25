@@ -41,6 +41,14 @@ resource "aws_s3_bucket" "checkpoints" {
   tags   = var.tags
 }
 
+resource "aws_s3_bucket_versioning" "checkpoints" {
+  bucket = aws_s3_bucket.checkpoints.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "checkpoints" {
   bucket                  = aws_s3_bucket.checkpoints.id
   block_public_acls       = true
@@ -61,7 +69,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "checkpoints" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "checkpoints" {
-  bucket = aws_s3_bucket.checkpoints.id
+  bucket     = aws_s3_bucket.checkpoints.id
+  depends_on = [aws_s3_bucket_versioning.checkpoints]
 
   rule {
     id     = "expire-old-checkpoints"
@@ -70,6 +79,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "checkpoints" {
 
     expiration {
       days = var.checkpoint_retention_days
+    }
+
+    # Bound storage after a checkpoint is overwritten or expires.
+    noncurrent_version_expiration {
+      noncurrent_days = var.checkpoint_retention_days
     }
 
     abort_incomplete_multipart_upload {

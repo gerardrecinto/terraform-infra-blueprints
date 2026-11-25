@@ -56,6 +56,24 @@ run "checkpoint_bucket_is_private_encrypted_and_expires" {
   }
 }
 
+run "overwritten_checkpoints_remain_recoverable_with_bounded_retention" {
+  command = plan
+
+  variables {
+    checkpoint_retention_days = 7
+  }
+
+  assert {
+    condition     = aws_s3_bucket_versioning.checkpoints.versioning_configuration[0].status == "Enabled"
+    error_message = "Versioning must preserve a checkpoint after an accidental overwrite or delete."
+  }
+
+  assert {
+    condition     = one([for r in aws_s3_bucket_lifecycle_configuration.checkpoints.rule : one(r.noncurrent_version_expiration).noncurrent_days]) == 7
+    error_message = "Previous versions must expire after the configured retention window, measured from becoming noncurrent."
+  }
+}
+
 run "spot_with_one_instance_type_is_warned_about" {
   command = plan
 
