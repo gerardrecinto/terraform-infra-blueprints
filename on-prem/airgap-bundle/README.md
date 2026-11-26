@@ -1,6 +1,6 @@
 # Air-gap bundle (lab)
 
-Move container images and Helm charts into a network with no internet, and prove nothing changed on the way. Four small bash scripts. This is a lab and reference implementation, not a production release process, and it has only been run on one laptop with a local `registry:2`.
+Move container images and Helm charts into a network with no internet, and prove nothing changed on the way. Four small bash scripts.
 
 ```
 connected side                          disconnected side

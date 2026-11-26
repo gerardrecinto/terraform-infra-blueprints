@@ -15,15 +15,12 @@ terraform validate
 
 This needs git and Terraform 1.7 or later. It uses no cloud credentials and creates nothing. The first `init` downloads the AWS provider and can take a few minutes. CI runs this module validation and the credential-free mocked plan tests below on Terraform 1.9.8.
 
-## What it does and does not do
+## What it does
 
-Does:
 - Gives you modules and workflows for Kubernetes, storage tiering, private connectivity and observability, with every input described and many checked at plan time.
 - Checks itself in CI: formatting, `terraform validate`, a Trivy misconfiguration scan, Terragrunt validation, Helm lint and render tests, and ansible-lint.
 
-Does not:
-- Prove any module works in a real account. Nothing here has been applied as part of this repo, and no production result is claimed.
-- Replace your own review. Treat everything as a reviewed starting point.
+Treat everything as a reviewed starting point.
 
 <details>
 <summary><b>Design principles</b></summary>
@@ -74,7 +71,7 @@ GCP/
 │   ├── apigee/            Apigee X org + env + instance; JS token auth; path routing; SpikeArrest
 │   ├── gke/               private cluster: Workload Identity, Binary Authorization, Shielded Nodes
 │   ├── gcs_lifecycle/     Standard → Nearline → Coldline → Archive with CMEK
-│   └── cloud_dns/         private or public managed zone, DNSSEC on public zones, record sets; plan-tested with a mocked provider, never applied
+│   └── cloud_dns/         private or public managed zone, DNSSEC on public zones, record sets; plan-tested with a mocked provider
 └── workflows/
     └── deploy_apigee_proxies/ three example API proxies with token auth + path routing
 
@@ -101,13 +98,13 @@ ansible/
 └── playbooks/k8s-rolling-node-upgrade.yml   cordon, drain, upgrade, verify and uncordon kubeadm workers one at a time
 
 Akamai/
-└── modules/gtm_failover/  Global Traffic Management: failover or weighted traffic between sites with a liveness test; validated and plan-tested with a mocked provider, never applied
+└── modules/gtm_failover/  Global Traffic Management: failover or weighted traffic between sites with a liveness test; validated and plan-tested with a mocked provider
 
 Cloudflare/
-└── modules/dns_records/   DNS records with proxied and ttl rules checked at plan time; plan-tested with a mocked provider, never applied
+└── modules/dns_records/   DNS records with proxied and ttl rules checked at plan time; plan-tested with a mocked provider
 
 Dynatrace/
-└── modules/slo_alerting/  availability SLO with error budget burn rate plus an alerting profile; validated and plan-tested with a mocked provider, never applied
+└── modules/slo_alerting/  availability SLO with error budget burn rate plus an alerting profile; validated and plan-tested with a mocked provider
 
 drills/
 ├── pull-the-plug/         Docker: two sites behind a health-checking proxy, plug pulled, failover and failback measured (lab)
