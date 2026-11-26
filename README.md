@@ -261,7 +261,7 @@ module "waf" {
 }
 ```
 
-Reference implementation: it carries no production metrics, and every limit should be tuned against real traffic. Threat model: [docs/threat-model-web-service.md](docs/threat-model-web-service.md).
+Reference implementation: tune every limit against your own traffic. Threat model: [docs/threat-model-web-service.md](docs/threat-model-web-service.md).
 
 ### `modules/dr_failover`
 
